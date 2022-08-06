@@ -19,7 +19,7 @@ namespace DinkumChinese
                 string ori = __instance.tips[i];
                 for (int j = 0; j < DinkumChinesePlugin.Inst.TipsTextLocList.Count; j++)
                 {
-                    // 如果已经翻译过，则跳过
+                    // 이미 번역된 경우 건너뛰기
                     if (DinkumChinesePlugin.Inst.TipsTextLocList[j].Loc == ori)
                     {
                         return;
@@ -28,7 +28,7 @@ namespace DinkumChinese
                 string t = TextLocData.GetLoc(DinkumChinesePlugin.Inst.TipsTextLocList, ori);
                 if (t == ori)
                 {
-                    Debug.Log($"LoadingScreenImageAndTips 有待翻译的文本:[{t}]，请添加到DynamicTextLoc");
+                    Debug.Log($"LoadingScreenImageAndTips 번역할 텍스트:[{t}]，DynamicTextLoc에 추가해주세요");
                 }
                 else
                 {

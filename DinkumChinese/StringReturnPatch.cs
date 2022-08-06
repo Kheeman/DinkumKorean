@@ -72,7 +72,7 @@ namespace DinkumChinese
             }
             else
             {
-                __instance.buttonText.text = __instance.buttonText.text.Replace("Request for ", "来自") + "的请求";
+                __instance.buttonText.text = __instance.buttonText.text.Replace("Request for ", "") + " 요청";
             }
         }
 
@@ -109,18 +109,18 @@ namespace DinkumChinese
         [HarmonyPostfix, HarmonyPatch(typeof(AnimalHouseMenu), "fillData")]
         public static void AnimalHouseMenu_fillData_Patch(AnimalHouseMenu __instance)
         {
-            __instance.eatenText.text = __instance.eatenText.text.Replace("Eaten", "喂食");
-            __instance.shelterText.text = __instance.shelterText.text.Replace("Shelter", "住所");
-            __instance.pettedText.text = __instance.pettedText.text.Replace("Petted", "爱抚");
+            __instance.eatenText.text = __instance.eatenText.text.Replace("Eaten", "먹이주기");
+            __instance.shelterText.text = __instance.shelterText.text.Replace("Shelter", "쉼터");
+            __instance.pettedText.text = __instance.pettedText.text.Replace("Petted", "쓰다듬기");
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CustomNetworkManager), "refreshLobbyTypeButtons")]
         public static void CustomNetworkManager_refreshLobbyTypeButtons_Patch(CustomNetworkManager __instance)
         {
-            __instance.friendGameText.text = __instance.friendGameText.text.Replace("Friends Only", "仅好友");
-            __instance.inviteOnlyText.text = __instance.inviteOnlyText.text.Replace("InviteOnly", "仅邀请");
-            __instance.publicGameText.text = __instance.publicGameText.text.Replace("Public", "公开");
-            __instance.lanGameText.text = __instance.lanGameText.text.Replace("LAN", "局域网");
+            __instance.friendGameText.text = __instance.friendGameText.text.Replace("Friends Only", "친구만");
+            __instance.inviteOnlyText.text = __instance.inviteOnlyText.text.Replace("InviteOnly", "초대만");
+            __instance.publicGameText.text = __instance.publicGameText.text.Replace("Public", "공개");
+            __instance.lanGameText.text = __instance.lanGameText.text.Replace("LAN", "LAN");
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Licence), "getConnectedSkillName")]
@@ -177,43 +177,43 @@ namespace DinkumChinese
                 string text2 = "";
                 if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
                 {
-                    text2 = "在所有季节";
+                    text2 = "모든 계절 ";
                 }
                 else
                 {
-                    text2 += "在";
+                    text2 += "확인";
                     if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer)
                     {
-                        text2 += "夏天";
+                        text2 += "여름";
                     }
                     if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
                     {
-                        if (text2 != "在")
+                        if (text2 != "확인")
                         {
-                            text2 += "和";
+                            text2 += "과 ";
                         }
-                        text2 += "秋天";
+                        text2 += "가을";
                     }
                     if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter)
                     {
-                        if (text2 != "在")
+                        if (text2 != "확인")
                         {
-                            text2 += "和";
+                            text2 += "과 ";
                         }
-                        text2 += "冬天";
+                        text2 += "겨울";
                     }
                     if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring)
                     {
-                        if (text2 != "在")
+                        if (text2 != "확인")
                         {
-                            text2 += "和";
+                            text2 += "과";
                         }
-                        text2 += "春天";
+                        text2 += "봄";
                     }
                 }
                 if (_this.allItems[itemId].placeable.tileObjectGrowthStages.needsTilledSoil)
                 {
-                    text = text + "适合" + text2 + "种植。";
+                    text = text + "" + text2 + "에 재배 적합.";
                 }
                 if (_this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length != 0)
                 {
@@ -222,11 +222,11 @@ namespace DinkumChinese
                         text = string.Concat(new string[]
                         {
                         text,
-                        "周围需要一些空间，因为它们会在旁边的位置结出<b>",
+                        "옆에<b>",
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length.ToString(),
-                        "个",
+                        "</b>에서 <b>",
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                        "</b>。该植株最多能分出4个分支！"
+                        "</b>이(가) 나오므로 주변에 공간이 필요합니다. 이 식물은 최대 4개의 가지를 나눌 수 있습니다"
                         });
                     }
                     else
@@ -234,12 +234,11 @@ namespace DinkumChinese
                         text = string.Concat(new string[]
                         {
                         text,
-                        "需要",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString(),
-                        "天的时间来生长，可收获",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                        "。"
+                        _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
+                        "개를 수확하는데 ",
+                        _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString(),
+                        "일이 걸립니다."
                         });
                     }
                 }
@@ -248,17 +247,17 @@ namespace DinkumChinese
                     text = string.Concat(new string[]
                     {
                     text,
-                    "后续每",
+                    "앞으로 ",
                     Mathf.Abs(_this.allItems[itemId].placeable.tileObjectGrowthStages.takeOrAddFromStateOnHarvest).ToString(),
-                    "天可收获",
-                    _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
+                    "일마다",
                     _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                    "。"
+                    _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
+                    "개를 수확할 수 있습니다."
                     });
                 }
                 if (!WorldManager.manageWorld.allObjectSettings[_this.allItems[itemId].placeable.tileObjectId].walkable)
                 {
-                    text += "噢，这还需要植物支架来附着生长。";
+                    text += "아, 여기에 붙어서 자라기 위한 식물 받침대도 필요합니다.";
                 }
             }
             __result = text;

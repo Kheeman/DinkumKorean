@@ -51,11 +51,11 @@ namespace DinkumChinese
         private void Awake()
         {
             Inst = this;
-            DevMode = Config.Bind<bool>("Dev", "DevMode", false, "开发模式时，可以按快捷键触发开发功能");
-            DontLoadLocOnDevMode = Config.Bind<bool>("Dev", "DontLoadLocOnDevMode", true, "开发模式时，不加载DynamicText Post Quest翻译，方便dump");
-            DebugWindow = new UIWindow("汉化测试工具[Ctrl+小键盘4]");
+            DevMode = Config.Bind<bool>("Dev", "DevMode", false, "개발 모드에서 단축키를 눌러 개발 모드를 트리거할 수 있습니다.");
+            DontLoadLocOnDevMode = Config.Bind<bool>("Dev", "DontLoadLocOnDevMode", true, "개발 모드에서는 DynamicText Post Quest 번역이 로드되지 않아 덤핑에 편리합니다.");
+            DebugWindow = new UIWindow("언어 테스트 도구 [Ctrl+키보드 4]");
             DebugWindow.OnWinodwGUI = DebugWindowGUI;
-            ErrorWindow = new UIWindow("汉化出现错误");
+            ErrorWindow = new UIWindow("언어 오류");
             ErrorWindow.OnWinodwGUI = ErrorWindowFunc;
             try
             {
@@ -66,12 +66,12 @@ namespace DinkumChinese
             }
             catch (ExecutionEngineException ex)
             {
-                ErrorStr = $"汉化出现错误。推测是由于用户名或者游戏路径中包含非英文字符导致。\n异常信息:\n{ex}";
+                ErrorStr = $"언어에 오류가 있습니다. 사용자 이름 또는 게임 경로에 영어가 아닌 문자가 포함된 것으로 추측됩니다. \n예외 정보:\n{ex}";
                 ErrorWindow.Show = true;
             }
             catch (Exception ex)
             {
-                ErrorStr = $"汉化出现错误。\n异常信息:\n{ex}";
+                ErrorStr = $"언어에 오류가 있습니다. \n예외 정보:\n{ex}";
                 ErrorWindow.Show = true;
             }
             if (DevMode.Value && DontLoadLocOnDevMode.Value)
@@ -100,29 +100,29 @@ namespace DinkumChinese
         {
             if (DevMode.Value)
             {
-                // Ctrl + 小键盘4 切换GUI
+                // Ctrl + Numpad 4 GUI 전환
                 if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad4))
                 {
                     DebugWindow.Show = !DebugWindow.Show;
                 }
-                // Ctrl + 小键盘5 切换暂停游戏，游戏速度1
+                // Ctrl + Numpad 5 게임을 일시 중지, 게임 속도 1
                 if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad5))
                 {
                     Pause = !Pause;
                     Time.timeScale = Pause ? 0 : 1;
                 }
-                // Ctrl + 小键盘6 切换暂停游戏，游戏速度10
+                // Ctrl + Numpad 6 게임을 일시 중지, 게임 속도 10.
                 if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad6))
                 {
                     Pause = !Pause;
                     Time.timeScale = Pause ? 1 : 10;
                 }
-                // Ctrl + 小键盘7 dump场景内所有文本，不包括隐藏的文本
+                // Ctrl + Numpad 7 숨겨진 텍스트를 제외한 장면의 모든 텍스트를 덤프합니다.
                 if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad7))
                 {
                     DumpText(false);
                 }
-                // Ctrl + 小键盘8 dump场景内所有文本，包括隐藏的文本
+                // Ctrl + Numpad 8 숨겨진 텍스트를 포함하여 장면의 모든 텍스트를 덤프합니다.
                 if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad8))
                 {
                     DumpText(true);
@@ -141,56 +141,56 @@ namespace DinkumChinese
 
         public void DebugWindowGUI()
         {
-            GUILayout.BeginVertical("功能区", GUI.skin.window);
-            if (GUILayout.Button("[Ctrl+小键盘5] 切换暂停游戏，游戏速度1"))
+            GUILayout.BeginVertical("기능", GUI.skin.window);
+            if (GUILayout.Button("[Ctrl+Numpad 5] 게임 일시 중지로 전환, 게임 속도 1"))
             {
                 Pause = !Pause;
                 Time.timeScale = Pause ? 0 : 1;
             }
-            if (GUILayout.Button("[Ctrl+小键盘6] 切换暂停游戏，游戏速度10"))
+            if (GUILayout.Button("[Ctrl+Numpad 6] 게임 일시 중지로 전환, 게임 속도 10"))
             {
                 Pause = !Pause;
                 Time.timeScale = Pause ? 1 : 10;
             }
-            if (GUILayout.Button("检查括号"))
+            if (GUILayout.Button("대괄호 확인"))
             {
                 CheckKuoHao();
             }
             GUILayout.EndVertical();
             GUILayout.BeginVertical("Dump", GUI.skin.window);
-            if (GUILayout.Button("[Ctrl+小键盘7] dump场景内所有文本，不包括隐藏的文本"))
+            if (GUILayout.Button("[Ctrl+Numpad 7] 숨겨진 텍스트를 제외한 장면의 모든 텍스트 덤프"))
             {
                 DumpText(false);
             }
-            if (GUILayout.Button("[Ctrl+小键盘8] dump场景内所有文本，包括隐藏的文本"))
+            if (GUILayout.Button("[Ctrl+Numpad 8] 숨겨진 텍스트를 포함하여 장면의 모든 텍스트 덤프"))
             {
                 DumpText(true);
             }
-            if (GUILayout.Button("dump所有不在多语言表格内的对话(需要未汉化状态)"))
+            if (GUILayout.Button("다국어 테이블에 없는 모든 대화 덤프(미완성)"))
             {
                 DumpAllConversation();
             }
-            if (GUILayout.Button("dump post(需要未汉化状态)"))
+            if (GUILayout.Button("dump post(미완성)"))
             {
                 DumpAllPost();
             }
-            if (GUILayout.Button("dump quest(需要未汉化状态)"))
+            if (GUILayout.Button("dump quest(미완성)"))
             {
                 DumpAllQuest();
             }
-            if (GUILayout.Button("dump mail(需要未汉化状态)"))
+            if (GUILayout.Button("dump mail(미완성)"))
             {
                 DumpAllMail();
             }
-            if (GUILayout.Button("dump tips(需要未汉化状态)"))
+            if (GUILayout.Button("dump tips(미완성)"))
             {
                 DumpAllTips();
             }
-            if (GUILayout.Button("dump animals(需要未汉化状态)"))
+            if (GUILayout.Button("dump animals(미완성)"))
             {
                 DumpAnimals();
             }
-            if (GUILayout.Button("dump没翻译key的物品(需要未汉化状态)"))
+            if (GUILayout.Button("번역된 키가 없는 항목 덤프(미완성)"))
             {
                 DumpAllUnTermItem();
             }
@@ -339,7 +339,7 @@ namespace DinkumChinese
             int hangOffset = 3;
             int findCount = 0;
             StringBuilder sb = new StringBuilder();
-            LogInfo($"开始检查翻译中的括号:");
+            LogInfo($"번역에서 괄호 확인 시작:");
             Regex reg = new Regex(@"(?is)(?<=\<)[^\>]+(?=\>)");
             var mResourcesCache = Traverse.Create(ResourceManager.pInstance).Field("mResourcesCache").GetValue<Dictionary<string, UnityEngine.Object>>();
             LanguageSourceAsset asset = mResourcesCache.Values.First() as LanguageSourceAsset;
@@ -352,7 +352,7 @@ namespace DinkumChinese
                 MatchCollection mc2 = reg.Matches(term.Languages[3]);
                 if (mc1.Count != mc2.Count)
                 {
-                    string log = $"行号:{i + hangOffset} Key:{term.Term} 中的括号数量不一致 英文原文有{mc1.Count}对括号 中文中有{mc2.Count}对括号";
+                    string log = $"줄번호:{i + hangOffset} Key:{term.Term} 괄호 수가 일치하지 않습니다. 원문에는 {mc1.Count}의 괄호가 있습니다. 번역에는 {mc2.Count}의 괄호가 있습니다.";
                     LogInfo(log);
                     sb.AppendLine(log);
                     findCount++;
@@ -363,7 +363,7 @@ namespace DinkumChinese
                     {
                         if (mc1[j].Value != mc2[j].Value)
                         {
-                            string log = $"行号:{i + hangOffset} Key:{term.Term} 中的第{j}对括号内容不一致 原文中:<{mc1[j].Value}> 翻译中:<{mc2[j].Value}>";
+                            string log = $"줄번호:{i + hangOffset} Key:{term.Term} 대괄호{j}의 내용이 일치하지 않습니다. 원본:<{mc1[j].Value}> 번역:<{mc2[j].Value}>";
                             LogInfo(log);
                             sb.AppendLine(log);
                             findCount++;
@@ -372,7 +372,7 @@ namespace DinkumChinese
                 }
             }
             sw.Stop();
-            LogInfo($"检查完毕，找到{findCount}个有问题的项，耗时{sw.ElapsedMilliseconds}ms");
+            LogInfo($"확인 후，문제있는 항목 {findCount}개 발견됨，{sw.ElapsedMilliseconds}ms 소요됨.");
             System.IO.File.WriteAllText($"{Paths.GameRootPath}/CheckKuoHao.txt", sb.ToString());
         }
 
@@ -454,7 +454,7 @@ namespace DinkumChinese
                 sb.AppendLine($"text:{tmp.text.StrToI2Str()}");
             }
             File.WriteAllText($"{Paths.GameRootPath}/I2/TextDump.txt", sb.ToString());
-            LogInfo($"Dump完毕,{Paths.GameRootPath}/I2/TextDump.txt");
+            LogInfo($"Dump완료,{Paths.GameRootPath}/I2/TextDump.txt");
         }
 
         public void DumpAllConversation()
@@ -477,7 +477,7 @@ namespace DinkumChinese
                             string line = $"{trem}\t{c.startLineAlt.aConverstationSequnce[i].StrToI2Str()}";
                             if (trems.Contains(trem))
                             {
-                                string log = $"重复的trem，忽略。{line}";
+                                string log = $"중복 대사 무시. {line}";
                                 Logger.LogError(log);
                             }
                             else
@@ -503,7 +503,7 @@ namespace DinkumChinese
                                 string line = $"{trem}\t{c.optionNames[j].StrToI2Str()}";
                                 if (trems.Contains(trem))
                                 {
-                                    string log = $"重复的trem，忽略。{line}";
+                                    string log = $"중복 대사 무시. {line}";
                                     Logger.LogError(log);
                                 }
                                 else
@@ -530,7 +530,7 @@ namespace DinkumChinese
                                 string line = $"{trem}\t{c.responesAlt[k].aConverstationSequnce[l].StrToI2Str()}";
                                 if (trems.Contains(trem))
                                 {
-                                    string log = $"重复的trem，忽略。{line}";
+                                    string log = $"중복 대사 무시. {line}";
                                     Logger.LogError(log);
                                 }
                                 else
@@ -642,7 +642,7 @@ namespace DinkumChinese
                     LogInfo(line);
                     if (keys.Contains(nameKey))
                     {
-                        string log = $"出现重复的key {nameKey} 已阻止此项添加";
+                        string log = $"중복 키가 나옴 {nameKey} 추가 안함";
                         Logger.LogError(log);
                     }
                     else
@@ -657,7 +657,7 @@ namespace DinkumChinese
                     LogInfo(line);
                     if (keys.Contains(descKey))
                     {
-                        string log = $"出现重复的key {descKey} 已阻止此项添加";
+                        string log = $"중복 키가 나옴 {descKey} 추가 안함";
                         Logger.LogError(log);
                     }
                     else
