@@ -9,6 +9,7 @@ namespace DinkumChinese
 {
     public class KoreanCheck
     {
+
         public class Josa
         {
             public Regex JosaRegex = new Regex(@"\(이\)가|\(와\)과|\(을\)를|\(은\)는|\(아\)야|\(이\)여|\(으\)로|\(이\)라");
@@ -45,18 +46,18 @@ namespace DinkumChinese
 
             public string Replace(string src)
             {
+                var strBuilder = new StringBuilder(src.Length);
+
                 var findMatches = FindRegex.Matches(src);
                 if (findMatches.Count == 0)
                     return src;
-                
-                var strBuilder = new StringBuilder(src.Length);
                 var lastHeadIndex = 0;
                 foreach (Match findMatch in findMatches)
                 {
                     var josaMatches = JosaRegex.Matches(findMatch.Value);
                     string engCheck = findMatch.Value.Replace(josaMatches[0].Value, "");
                     int index = 0;
-                    
+                    //lastHeadIndex = findMatch.Index;
                     foreach (Match josaMatch in josaMatches)
                     {
                         var josaPair = _josaPatternPaird[josaMatch.Value];
@@ -82,8 +83,8 @@ namespace DinkumChinese
                         }
                         lastHeadIndex = index + josaMatch.Length;
                     }
-                    strBuilder.Append(src, lastHeadIndex, src.Length - lastHeadIndex);
                 }
+                strBuilder.Append(src, lastHeadIndex, src.Length - lastHeadIndex);
                 return strBuilder.ToString();
             }
 
@@ -121,7 +122,6 @@ namespace DinkumChinese
                     foreach (Match matche in matches)
                         return matche.Value.LastIndexOf(inChar) > 0 ? false : true;
                 }
-
                 return false;
             }
         }
@@ -133,4 +133,5 @@ namespace DinkumChinese
 
         static Josa _josa = new Josa();
     }
+
 }

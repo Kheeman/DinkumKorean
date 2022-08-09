@@ -272,7 +272,7 @@ namespace DinkumChinese
                 Debug.Log($"Conversation_getIntroName {__result}");
             return false;
         }
-
+        
         [HarmonyPrefix, HarmonyPatch(typeof(Conversation), "getOptionName")]
         public static bool Conversation_getOptionName(Conversation __instance, ref string __result, int i)
         {

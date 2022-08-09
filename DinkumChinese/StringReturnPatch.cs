@@ -57,6 +57,14 @@ namespace DinkumChinese
         //}
 
         //ADD
+        [HarmonyPostfix, HarmonyPatch(typeof(ConversationManager), "readConversationSegment")]
+        public static void ConversationManager_readConversationSegment(ConversationManager __instance)
+        {
+            string text = __instance.conversationTextPro.text;
+            __instance.conversationTextPro.text = KoreanCheck.ReplaceJosa(text);
+        }
+
+
         [HarmonyPostfix, HarmonyPatch(typeof(AnimalHouseMenu), "openConfirm")]
         public static void AnimalHouseMenu_openConfirm_Patch(AnimalHouseMenu __instance, ref FarmAnimalDetails ___showingAnimal)
         {
@@ -167,10 +175,7 @@ namespace DinkumChinese
             }
 
             if (!string.IsNullOrEmpty(ret))
-            {
                 __result = KoreanCheck.ReplaceJosa(ret);
-                //DinkumChinesePlugin.LogInfo("Original: [" + ret + "] , result: [" + __result + "]");
-            }
             else
                 __result = "";
         }
@@ -230,12 +235,11 @@ namespace DinkumChinese
         [HarmonyPostfix, HarmonyPatch(typeof(QuestTracker), "updatePinnedTask")]
         public static void QuestTracker_updatePinnedTask_Patch(QuestTracker __instance, ref QuestTracker.typeOfTask ___pinnedType, ref int ___pinnedId)
         {
-            foreach (var quest in QuestManager.manage.allQuests)
+            if (___pinnedType == QuestTracker.typeOfTask.Quest)
             {
-                string nameOri = quest.QuestName.StrToI2Str();
+                string nameOri = QuestManager.manage.allQuests[___pinnedId].QuestName;
                 string name = TextLocData.GetLoc(DinkumChinesePlugin.Inst.QuestTextLocList, nameOri);
-                string pinText = __instance.pinMissionText.text.Replace(quest.QuestName, name);
-                __instance.pinMissionText.text = pinText;
+                __instance.pinMissionText.text = name + "\n<size=11>" + QuestManager.manage.allQuests[___pinnedId].getMissionObjText();
             }
 
             if (___pinnedType == QuestTracker.typeOfTask.Request)
@@ -252,8 +256,8 @@ namespace DinkumChinese
         public static void QuestTracker_displayRequest_Patch(QuestTracker __instance, int requestNo)
         {
             __instance.questTitle.text = NPCManager.manage.NPCDetails[requestNo].NPCName + "의 요청";
-            string text = NPCManager.manage.NPCDetails[requestNo].NPCName + "(이)가 " + NPCManager.manage.NPCRequests[requestNo].getDesiredItemName() + "(을)를 가져와달라고 요청했습니다";
-            __instance.questDesc.text = KoreanCheck.ReplaceJosa(text);
+            string text = KoreanCheck.ReplaceJosa(NPCManager.manage.NPCDetails[requestNo].NPCName + "(이)가 " + NPCManager.manage.NPCRequests[requestNo].getDesiredItemName() + "(을)를 가져와 달라고 요청했습니다");
+            __instance.questDesc.text = text;
             __instance.questDateGiven.text = "하루가 끝나기 전까지";
         }
 
@@ -579,7 +583,6 @@ namespace DinkumChinese
             {
                 text = text.Replace("대화하기", "") + " 대화하기";
             }
-            //DinkumChinesePlugin.LogInfo("buttonText: [" + buttonPromptText + "] , result: [" + text+"]" );
             __instance.itemText.text = text.Trim();
         }
 
@@ -619,6 +622,8 @@ namespace DinkumChinese
         [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "getMissionText")]
         public static void NPCRequest_getMissionText_Patch(NPCRequest __instance, int npcId, ref string __result)
         {
+            __result = "<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
+
             if (__instance.specificDesiredItem != -1)
             {
                 string text = " [" + __instance.checkAmountOfItemsInInv() + "/" + __instance.desiredAmount + "]";
@@ -629,8 +634,6 @@ namespace DinkumChinese
 
                 __result = "<sprite=12> " + __instance.getDesiredItemName() + " 수집하기" + text + "\n<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
             }
-
-            __result = "<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomBugNoAndLocation")]
@@ -762,7 +765,7 @@ namespace DinkumChinese
                     text += " 아, 여기에 붙어서 자라기 위한 식물 받침대도 필요합니다.";
                 }
             }
-            __result = text;
+            __result = KoreanCheck.ReplaceJosa(text);
             return false;
         }
 

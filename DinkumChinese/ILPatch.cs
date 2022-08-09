@@ -601,8 +601,8 @@ namespace DinkumChinese
             instructions = ReplaceIL(instructions, "The design just came to me, y'know?", "디자인이 딱 떠올랐죠?");
             instructions = ReplaceIL(instructions, "Y'know, that would look great on you, ", "그게 당신에게 잘어울립니다, ");
             instructions = ReplaceIL(instructions, "I put a lot of myself into this one.", "저는 이 작품에 많은 노력을 기울였습니다.");
-            instructions = ReplaceIL(instructions, "Beginning...", "말하자면...");
-            instructions = ReplaceIL(instructions, "...Nothing happened...", "...별일 아닙니다...");
+            instructions = ReplaceIL(instructions, "Beginning...", "시작중...");
+            instructions = ReplaceIL(instructions, "...Nothing happened...", "...아무일도 없습니다...");
             instructions = ReplaceIL(instructions, "Permit Points", "면허 점수");
             instructions = ReplaceIL(instructions, "s", "");
             return instructions;
