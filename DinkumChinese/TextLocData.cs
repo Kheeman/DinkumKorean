@@ -37,7 +37,7 @@ namespace DinkumChinese
                 {
                     fileInfo.Directory.Create();
                 }
-                File.WriteAllText(path, "Key,Chinese");
+                File.WriteAllText(path, "Key,Korean");
             }
             else
             {
@@ -93,7 +93,7 @@ namespace DinkumChinese
             {
                 if (loc.Ori == ori)
                 {
-                    return loc.Loc;
+                    return KoreanCheck.ReplaceJosa(loc.Loc);
                 }
             }
             return ori;

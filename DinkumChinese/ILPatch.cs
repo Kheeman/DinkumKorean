@@ -12,7 +12,7 @@ namespace DinkumChinese
     public static class ILPatch
     {
         /// <summary>
-        /// 在IL中替换文本
+        /// IL에서 텍스트 바꾸기
         /// </summary>
         public static IEnumerable<CodeInstruction> ReplaceIL(IEnumerable<CodeInstruction> instructions, string target, string i18n)
         {
@@ -32,7 +32,7 @@ namespace DinkumChinese
             }
             if (!success)
             {
-                Debug.LogWarning($"플러그인이 {target}을(를) {i18n}(으)로 대체하는 데 실패, 대상을 찾을 수 없습니다.");
+                Debug.LogWarning($"플러그인이 {target}(을)를 {i18n}(으)로 대체하는 데 실패, 대상을 찾을 수 없습니다.");
             }
             return list.AsEnumerable();
         }
@@ -56,14 +56,14 @@ namespace DinkumChinese
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(QuestTracker), "displayRequest")]
-        public static IEnumerable<CodeInstruction> QuestTracker_displayRequest_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "Request for ", "요청을 ");
-            instructions = ReplaceIL(instructions, " has asked you to get ", "이(가) 했습니다. 오늘 끝나기전에");
-            instructions = ReplaceIL(instructions, "By the end of the day", "을(를) 하세요.");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(QuestTracker), "displayRequest")]
+        //public static IEnumerable<CodeInstruction> QuestTracker_displayRequest_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "Request for ", "요청을 ");
+        //    instructions = ReplaceIL(instructions, " has asked you to get ", "(이)가 했습니다. 오늘 끝나기전에");
+        //    instructions = ReplaceIL(instructions, "By the end of the day", "(을)를 하세요.");
+        //    return instructions;
+        //}
 
         [HarmonyTranspiler, HarmonyPatch(typeof(QuestTracker), "displayQuest")]
         public static IEnumerable<CodeInstruction> QuestTracker_displayQuest_Patch(IEnumerable<CodeInstruction> instructions)
@@ -82,17 +82,17 @@ namespace DinkumChinese
         [HarmonyTranspiler, HarmonyPatch(typeof(QuestTracker), "updateLookingAtTask")]
         public static IEnumerable<CodeInstruction> QuestTracker_updateLookingAtTask_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, "<sprite=17> Pinned", "<sprite=17> 고정됨");
-            instructions = ReplaceIL(instructions, "<sprite=16> Pinned", "<sprite=16> 고정됨");
+            instructions = ReplaceIL(instructions, "<sprite=17> Pinned", "<sprite=17> 고정");
+            instructions = ReplaceIL(instructions, "<sprite=16> Pinned", "<sprite=16> 고정");
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(QuestTracker), "updatePinnedTask")]
-        public static IEnumerable<CodeInstruction> QuestTracker_updatePinnedTask_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "Request for ", "요청한 사람 ");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(QuestTracker), "updatePinnedTask")]
+        //public static IEnumerable<CodeInstruction> QuestTracker_updatePinnedTask_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "Request for ", "요청한 사람 ");
+        //    return instructions;
+        //}
 
         [HarmonyTranspiler, HarmonyPatch(typeof(QuestTracker), "updatePinnedRecipeButton")]
         public static IEnumerable<CodeInstruction> QuestTracker_updatePinnedRecipeButton_Patch(IEnumerable<CodeInstruction> instructions)
@@ -118,23 +118,23 @@ namespace DinkumChinese
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(BulletinBoard), "getMissionText")]
-        public static IEnumerable<CodeInstruction> BulletinBoard_getMissionText_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "<sprite=12> Speak to ", "<sprite=12> 대화 ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Hunt down the ", "<sprite=12> 사냥 ");
-            instructions = ReplaceIL(instructions, " using its last know location on the map", " 지도에서 마지막으로 알려진 위치 사용");
-            instructions = ReplaceIL(instructions, "<sprite=13> Visit the location on the map to investigate", "<sprite=13> 지도의 위치를 방문하여 조사");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(BulletinBoard), "getMissionText")]
+        //public static IEnumerable<CodeInstruction> BulletinBoard_getMissionText_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "<sprite=12> Speak to ", "<sprite=12> 대화 ");
+        //    instructions = ReplaceIL(instructions, "<sprite=12> Hunt down the ", "<sprite=12> 사냥 ");
+        //    instructions = ReplaceIL(instructions, " using its last know location on the map", " 지도에서 마지막으로 알려진 위치 사용");
+        //    instructions = ReplaceIL(instructions, "<sprite=13> Visit the location on the map to investigate", "<sprite=13> 지도의 위치를 방문하여 조사");
+        //    return instructions;
+        //}
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(AnimalHouseMenu), "openConfirm")]
-        public static IEnumerable<CodeInstruction> AnimalHouseMenu_openConfirm_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "Sell ", "판매 ");
-            instructions = ReplaceIL(instructions, " for <sprite=11>", " 으로 <sprite=11>");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(AnimalHouseMenu), "openConfirm")]
+        //public static IEnumerable<CodeInstruction> AnimalHouseMenu_openConfirm_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "Sell ", "판매 ");
+        //    instructions = ReplaceIL(instructions, " for <sprite=11>", " 으로 <sprite=11>");
+        //    return instructions;
+        //}
 
         [HarmonyTranspiler, HarmonyPatch(typeof(AnimalHouseMenu), "fillData")]
         public static IEnumerable<CodeInstruction> AnimalHouseMenu_fillData_Patch(IEnumerable<CodeInstruction> instructions)
@@ -142,86 +142,86 @@ namespace DinkumChinese
             instructions = ReplaceIL(instructions, " Year", " 년");
             instructions = ReplaceIL(instructions, " Month", " 월");
             instructions = ReplaceIL(instructions, " Day", " 일");
-            instructions = ReplaceIL(instructions, "s", "초");
+            instructions = ReplaceIL(instructions, "s", "");
             instructions = ReplaceIL(instructions, "SELL ", "판매 ");
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(Task), MethodType.Constructor, new Type[] { typeof(int), typeof(int) })]
-        public static IEnumerable<CodeInstruction> Task_Constructor_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "Harvest ", "수확 ");
-            instructions = ReplaceIL(instructions, "Catch ", "포획 ");
-            instructions = ReplaceIL(instructions, " Bugs", " 수집");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(Task), MethodType.Constructor, new Type[] { typeof(int), typeof(int) })]
+        //public static IEnumerable<CodeInstruction> Task_Constructor_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "Harvest ", "수확하기 ");
+        //    instructions = ReplaceIL(instructions, "Catch ", "포획하기 ");
+        //    instructions = ReplaceIL(instructions, " Bugs", " 곤충");
+        //    return instructions;
+        //}
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(Task), "generateTask")]
-        public static IEnumerable<CodeInstruction> Task_generateTask_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "Harvest ", "수확 ");
-            instructions = ReplaceIL(instructions, "Chat with ", "대화 ");
-            instructions = ReplaceIL(instructions, " residents", " 주민");
-            instructions = ReplaceIL(instructions, "Bury ", "묻기 ");
-            instructions = ReplaceIL(instructions, " Fruit", " 과일");
-            instructions = ReplaceIL(instructions, "Collect ", "채집 ");
-            instructions = ReplaceIL(instructions, " Shells", " 껍질");
-            instructions = ReplaceIL(instructions, "Sell ", "판매");
-            instructions = ReplaceIL(instructions, "Do a job for someone", "누군가 위해 일하기");
-            instructions = ReplaceIL(instructions, "Plant ", "재배 ");
-            instructions = ReplaceIL(instructions, " Wild Seeds", " 야생종자");
-            instructions = ReplaceIL(instructions, "Dig up dirt ", "흙 파내기 ");
-            instructions = ReplaceIL(instructions, " times", "배");
-            instructions = ReplaceIL(instructions, "Catch ", "포획 ");
-            instructions = ReplaceIL(instructions, " Bugs", " 수집");
-            instructions = ReplaceIL(instructions, "Craft ", "제작 ");
-            instructions = ReplaceIL(instructions, " Items", " 아이템");
-            instructions = ReplaceIL(instructions, "Eat something", "무언가 먹기");
-            instructions = ReplaceIL(instructions, "Make ", "획득 ");
-            instructions = ReplaceIL(instructions, "Spend ", "소비 ");
-            instructions = ReplaceIL(instructions, "Travel ", "이동 ");
-            instructions = ReplaceIL(instructions, "m on foot.", "분（도보로）");
-            instructions = ReplaceIL(instructions, "m by vehicle", "분（차량으로）");
-            instructions = ReplaceIL(instructions, "Cook ", "요리 ");
-            instructions = ReplaceIL(instructions, " meat", " 고기");
-            instructions = ReplaceIL(instructions, " fruit", " 열매");
-            instructions = ReplaceIL(instructions, "Cook something at the Cooking table", "조리대에서 무언가를 요리");
-            instructions = ReplaceIL(instructions, " tree seeds", " 나무종자");
-            instructions = ReplaceIL(instructions, "crop seeds", "작물종자");
-            instructions = ReplaceIL(instructions, "Water ", "물 주기 ");
-            instructions = ReplaceIL(instructions, " crops", " 작물");
-            instructions = ReplaceIL(instructions, "Smash ", "캐기 ");
-            instructions = ReplaceIL(instructions, " rocks", " 암석");
-            instructions = ReplaceIL(instructions, " ore rocks", " 광석");
-            instructions = ReplaceIL(instructions, "Smelt some ore into a bar", "약갼의 광석을 주괴로 제련");
-            instructions = ReplaceIL(instructions, "Grind ", "연마 ");
-            instructions = ReplaceIL(instructions, " stones", " 바위");
-            instructions = ReplaceIL(instructions, "Cut down ", "벌목 ");
-            instructions = ReplaceIL(instructions, " trees", " 목재");
-            instructions = ReplaceIL(instructions, "Clear ", "정리 ");
-            instructions = ReplaceIL(instructions, " tree stumps", " 그루터기");
-            instructions = ReplaceIL(instructions, "Saw ", "톱질 ");
-            instructions = ReplaceIL(instructions, " planks", " 판자");
-            instructions = ReplaceIL(instructions, " Fish", " 생선");
-            instructions = ReplaceIL(instructions, " grass", " 풀");
-            instructions = ReplaceIL(instructions, "Pet an animal", "동물 쓰다듬기");
-            instructions = ReplaceIL(instructions, "Buy some new clothes", "새 옷을 사기");
-            instructions = ReplaceIL(instructions, "Buy some new furniture", "새 가구를 사기");
-            instructions = ReplaceIL(instructions, "Buy some new wallpaper", "새 벽지를 사기");
-            instructions = ReplaceIL(instructions, "Buy some new flooring", "새 바닥재를 사기");
-            instructions = ReplaceIL(instructions, "Compost something", "퇴비만들기");
-            instructions = ReplaceIL(instructions, "Craft a new tool", "새 도구 제작하기");
-            instructions = ReplaceIL(instructions, "Buy ", "구매 ");
-            instructions = ReplaceIL(instructions, " seeds", " 종자");
-            instructions = ReplaceIL(instructions, "Trap an animal and deliver it", "동물 포획 및 운반하기");
-            instructions = ReplaceIL(instructions, "Hunt ", "사냥 ");
-            instructions = ReplaceIL(instructions, " animals", " 동물");
-            instructions = ReplaceIL(instructions, "Buy a new tool", "새 도구를 사기");
-            instructions = ReplaceIL(instructions, "Break a tool", "도구 부서뜨리기");
-            instructions = ReplaceIL(instructions, "Find some burried treasure", "묻힌 보물찾기");
-            instructions = ReplaceIL(instructions, "No mission set", "정해진 과제 없음");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(Task), "generateTask")]
+        //public static IEnumerable<CodeInstruction> Task_generateTask_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "Harvest ", "수확 ");
+        //    instructions = ReplaceIL(instructions, "Chat with ", "대화 ");
+        //    instructions = ReplaceIL(instructions, " residents", " 주민");
+        //    instructions = ReplaceIL(instructions, "Bury ", "묻기 ");
+        //    instructions = ReplaceIL(instructions, " Fruit", " 과일");
+        //    instructions = ReplaceIL(instructions, "Collect ", "채집 ");
+        //    instructions = ReplaceIL(instructions, " Shells", " 껍질");
+        //    instructions = ReplaceIL(instructions, "Sell ", "판매");
+        //    instructions = ReplaceIL(instructions, "Do a job for someone", "누군가 위해 일하기");
+        //    instructions = ReplaceIL(instructions, "Plant ", "재배 ");
+        //    instructions = ReplaceIL(instructions, " Wild Seeds", " 야생종자");
+        //    instructions = ReplaceIL(instructions, "Dig up dirt ", "흙 파내기 ");
+        //    instructions = ReplaceIL(instructions, " times", "배");
+        //    instructions = ReplaceIL(instructions, "Catch ", "포획 ");
+        //    instructions = ReplaceIL(instructions, " Bugs", " 수집");
+        //    instructions = ReplaceIL(instructions, "Craft ", "제작 ");
+        //    instructions = ReplaceIL(instructions, " Items", " 아이템");
+        //    instructions = ReplaceIL(instructions, "Eat something", "무언가 먹을것");
+        //    instructions = ReplaceIL(instructions, "Make ", "획득 ");
+        //    instructions = ReplaceIL(instructions, "Spend ", "소비 ");
+        //    instructions = ReplaceIL(instructions, "Travel ", "이동 ");
+        //    instructions = ReplaceIL(instructions, "m on foot.", "분（도보로）");
+        //    instructions = ReplaceIL(instructions, "m by vehicle", "분（차량으로）");
+        //    instructions = ReplaceIL(instructions, "Cook ", "요리 ");
+        //    instructions = ReplaceIL(instructions, " meat", " 고기");
+        //    instructions = ReplaceIL(instructions, " fruit", " 열매");
+        //    instructions = ReplaceIL(instructions, "Cook something at the Cooking table", "조리대에서 무언가를 요리");
+        //    instructions = ReplaceIL(instructions, " tree seeds", " 나무종자");
+        //    instructions = ReplaceIL(instructions, "crop seeds", "작물종자");
+        //    instructions = ReplaceIL(instructions, "Water ", "물 주기 ");
+        //    instructions = ReplaceIL(instructions, " crops", " 작물");
+        //    instructions = ReplaceIL(instructions, "Smash ", "캐기 ");
+        //    instructions = ReplaceIL(instructions, " rocks", " 암석");
+        //    instructions = ReplaceIL(instructions, " ore rocks", " 광석");
+        //    instructions = ReplaceIL(instructions, "Smelt some ore into a bar", "약갼의 광석을 주괴로 제련");
+        //    instructions = ReplaceIL(instructions, "Grind ", "연마 ");
+        //    instructions = ReplaceIL(instructions, " stones", " 바위");
+        //    instructions = ReplaceIL(instructions, "Cut down ", "벌목 ");
+        //    instructions = ReplaceIL(instructions, " trees", " 목재");
+        //    instructions = ReplaceIL(instructions, "Clear ", "정리 ");
+        //    instructions = ReplaceIL(instructions, " tree stumps", " 그루터기");
+        //    instructions = ReplaceIL(instructions, "Saw ", "톱질 ");
+        //    instructions = ReplaceIL(instructions, " planks", " 판자");
+        //    instructions = ReplaceIL(instructions, " Fish", " 생선");
+        //    instructions = ReplaceIL(instructions, " grass", " 풀");
+        //    instructions = ReplaceIL(instructions, "Pet an animal", "동물 쓰다듬기");
+        //    instructions = ReplaceIL(instructions, "Buy some new clothes", "새 옷을 사기");
+        //    instructions = ReplaceIL(instructions, "Buy some new furniture", "새 가구를 사기");
+        //    instructions = ReplaceIL(instructions, "Buy some new wallpaper", "새 벽지를 사기");
+        //    instructions = ReplaceIL(instructions, "Buy some new flooring", "새 바닥재를 사기");
+        //    instructions = ReplaceIL(instructions, "Compost something", "퇴비만들기");
+        //    instructions = ReplaceIL(instructions, "Craft a new tool", "새 도구 제작하기");
+        //    instructions = ReplaceIL(instructions, "Buy ", "구매 ");
+        //    instructions = ReplaceIL(instructions, " seeds", " 종자");
+        //    instructions = ReplaceIL(instructions, "Trap an animal and deliver it", "동물 포획 및 운반하기");
+        //    instructions = ReplaceIL(instructions, "Hunt ", "사냥 ");
+        //    instructions = ReplaceIL(instructions, " animals", " 동물");
+        //    instructions = ReplaceIL(instructions, "Buy a new tool", "새 도구를 사기");
+        //    instructions = ReplaceIL(instructions, "Break a tool", "도구 부서뜨리기");
+        //    instructions = ReplaceIL(instructions, "Find some burried treasure", "묻힌 보물찾기");
+        //    instructions = ReplaceIL(instructions, "No mission set", "정해진 과제 없음");
+        //    return instructions;
+        //}
 
         [HarmonyTranspiler, HarmonyPatch(typeof(WeatherManager), "currentWeather")]
         public static IEnumerable<CodeInstruction> WeatherManager_currentWeather_Patch(IEnumerable<CodeInstruction> instructions)
@@ -281,7 +281,7 @@ namespace DinkumChinese
         [HarmonyTranspiler, HarmonyPatch(typeof(CameraController), "moveCameraToShowPos", MethodType.Enumerator)]
         public static IEnumerable<CodeInstruction> CameraController_moveCameraToShowPos_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, " is visiting the island!", " 이(가) 섬을 방문 중입니다!");
+            instructions = ReplaceIL(instructions, " is visiting the island!", " (이)가 섬을 방문 중입니다!");
             instructions = ReplaceIL(instructions, "Someone is visiting the island!", "누군가 섬을 방문하고 있습니다!");
             instructions = ReplaceIL(instructions, "No one is visiting today...", "오늘은 아무도 안 온다...");
             return instructions;
@@ -298,15 +298,15 @@ namespace DinkumChinese
         [HarmonyTranspiler, HarmonyPatch(typeof(EquipItemToChar), "OnDestroy")]
         public static IEnumerable<CodeInstruction> EquipItemToChar_OnDestroy_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, " has left", "이(가) 떠났다");
+            instructions = ReplaceIL(instructions, " has left", "(이)가 떠났습니다");
             return instructions;
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(EquipItemToChar), "UserCode_RpcCharacterJoinedPopup")]
         public static IEnumerable<CodeInstruction> EquipItemToChar_UserCode_RpcCharacterJoinedPopup_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, "Welcome to ", "어서오세요 "); ;
-            instructions = ReplaceIL(instructions, " has joined", "이(가) 합류했습니다");
+            instructions = ReplaceIL(instructions, "Welcome to ", "환영합니다 "); ;
+            instructions = ReplaceIL(instructions, " has joined", "(이)가 합류했습니다");
             return instructions;
         }
 
@@ -346,7 +346,7 @@ namespace DinkumChinese
         [HarmonyTranspiler, HarmonyPatch(typeof(NetworkNavMesh), "waitForNameToChange", MethodType.Enumerator)]
         public static IEnumerable<CodeInstruction> NetworkNavMesh_waitForNameToChange_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, " has joined", "이(가) 합류했습니다");
+            instructions = ReplaceIL(instructions, " has joined", "(이)가 합류했습니다");
             return instructions;
         }
 
@@ -393,45 +393,45 @@ namespace DinkumChinese
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(Quest), "getMissionObjText")]
-        public static IEnumerable<CodeInstruction> Quest_getMissionObjText_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "<sprite=12> Attract a total of 5 permanent residents to move to ", "<sprite=12> 다음으로 이주하기 위해 총 5 명의 영구 거주자를 유치: ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Talk to ", "\n<sprite=12> 대화");
-            instructions = ReplaceIL(instructions, " once the Base Tent has been moved", "베이스 텐트 이동 후에");
-            instructions = ReplaceIL(instructions, "<sprite=13> Craft a ", "<sprite=13> ");
-            instructions = ReplaceIL(instructions, "at the crafting table in the Base Tent.\n<sprite=13> Place the  ", "을(를) 베이스 텐트 제작대에서 제작하고\n<sprite=13> ");
-            instructions = ReplaceIL(instructions, " down outside.\n<sprite=13> Place Tin Ore into ", "을(를) 바깥쪽에 배치합니다.\n<sprite=13> 주석 광석을");
-            instructions = ReplaceIL(instructions, " and wait for it to become ", "에 넣고 녹을 때까지 기다립니다");
-            instructions = ReplaceIL(instructions, ".\n<sprite=12> Take the ", ".\n<sprite=12> 잡고");
-            instructions = ReplaceIL(instructions, " to ", "에 ");
-            instructions = ReplaceIL(instructions, " down outside.\n<sprite=12> Place Tin Ore into ", "바깥쪽으로.\n<sprite=12> 주석 광석 놓기");
-            instructions = ReplaceIL(instructions, "at the crafting table in the Base Tent.\n<sprite=12> Place the  ", "베이스 텐트 제작대에서\n<sprite=12> 배치 ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Craft a ", "<sprite=12> 제작 ");
-            instructions = ReplaceIL(instructions, "<sprite=13> Buy the ", "<sprite=13> 구입 ");
-            instructions = ReplaceIL(instructions, "\n<sprite=12> Talk to ", "\n<sprite=12> 대화 ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Buy the ", "<sprite=12> 구입 ");
-            instructions = ReplaceIL(instructions, "[Optional] Complete Daily tasks\n<sprite=12> Place sleeping bag and get some rest.", "[선택 사항] 일일 작업 완료\n<sprite=12>침낭을 놓고 휴식을 취하세요.");
-            instructions = ReplaceIL(instructions, "<sprite=13> Find something to eat.\n<sprite=12> Talk to ", "<sprite=13> 먹을 것을 찾으세요.\n<sprite=12> 대화하기: ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Find something to eat.\n<sprite=12> Talk to ", "<sprite=12> 먹을 것을 찾으세요.\n<sprite=12> 대화하기: ");
-            instructions = ReplaceIL(instructions, "<sprite=13> Collect the requested items.\n<sprite=12> Bring items to ", "<sprite=13> 의뢰 아이템 수집\n<sprite=12> 아이템 가져가기: ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Collect the requested items.", "<sprite=12> 의뢰 아이템 수집");
-            instructions = ReplaceIL(instructions, "\n<sprite=12> Bring items to ", "\n<sprite=12> 아이템 가져가기: ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Do some favours for John", "<sprite=12> John에게 호의를 베풀다");
-            instructions = ReplaceIL(instructions, "<sprite=13> Do some favours for John", "<sprite=13> John에게 호의를 베풀다");
-            instructions = ReplaceIL(instructions, "\n<sprite=12> Spend money or sell items in John's store", "\n<sprite=12> John의 상점에서 돈을 쓰거나 아이템 팔기");
-            instructions = ReplaceIL(instructions, "\n<sprite=13> Spend money or sell items in John's store", "\n<sprite=13> John의 상점에서 돈을 쓰거나 아이템 팔기");
-            instructions = ReplaceIL(instructions, "\n<sprite=12> Convince John to move in.", "\n<sprite=12> John이 이사오도록 설득하세요.");
-            instructions = ReplaceIL(instructions, "<sprite=12> Ask ", "<sprite=12> 물어보기 ");
-            instructions = ReplaceIL(instructions, " about the town to apply for the ", "신청할 마을에 대해");
-            instructions = ReplaceIL(instructions, "<sprite=12> Place the ", "<sprite=12> 배치 ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Wait for construction of the  ", "<sprite=12> 건설 대기");
-            instructions = ReplaceIL(instructions, " to be completed", " 건설 완료");
-            instructions = ReplaceIL(instructions, "<sprite=12> Place the required items into the construction box at the deed site", "<sprite=12> 계약 장소의 건설 상자에 필요한 아이템을 넣습니다.");
-            instructions = ReplaceIL(instructions, "<sprite=12> Place ", "<sprite=12> 배치 ");
-            instructions = ReplaceIL(instructions, "<sprite=13> Place ", "<sprite=13> 배치 ");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(Quest), "getMissionObjText")]
+        //public static IEnumerable<CodeInstruction> Quest_getMissionObjText_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+            //instructions = ReplaceIL(instructions, "<sprite=12> Attract a total of 5 permanent residents to move to ", "<sprite=12> 다음으로 이주하기 위해 총 5 명의 영구 거주자를 유치: ");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Talk to ", "\n<sprite=12> 대화");
+            //instructions = ReplaceIL(instructions, " once the Base Tent has been moved", "베이스 텐트 이동 후에");
+            //instructions = ReplaceIL(instructions, "<sprite=13> Craft a ", "<sprite=13> ");
+            //instructions = ReplaceIL(instructions, "at the crafting table in the Base Tent.\n<sprite=13> Place the  ", "(을)를 베이스 텐트 제작대에서 제작하고\n<sprite=13> ");
+            //instructions = ReplaceIL(instructions, " down outside.\n<sprite=13> Place Tin Ore into ", "(을)를 바깥쪽에 배치합니다.\n<sprite=13> 주석 광석을");
+            //instructions = ReplaceIL(instructions, " and wait for it to become ", "에 넣고 녹을 때까지 기다립니다");
+            //instructions = ReplaceIL(instructions, ".\n<sprite=12> Take the ", ".\n<sprite=12> 잡고");
+            //instructions = ReplaceIL(instructions, " to ", "에 ");
+            //instructions = ReplaceIL(instructions, " down outside.\n<sprite=12> Place Tin Ore into ", "바깥쪽으로.\n<sprite=12> 주석 광석 놓기");
+            //instructions = ReplaceIL(instructions, "at the crafting table in the Base Tent.\n<sprite=12> Place the  ", "베이스 텐트 제작대에서\n<sprite=12> 배치 ");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Craft a ", "<sprite=12> 제작 ");
+            //instructions = ReplaceIL(instructions, "<sprite=13> Buy the ", "<sprite=13> 구입 ");
+            //instructions = ReplaceIL(instructions, "\n<sprite=12> Talk to ", "\n<sprite=12> 대화 ");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Buy the ", "<sprite=12> 구입 ");
+            //instructions = ReplaceIL(instructions, "[Optional] Complete Daily tasks\n<sprite=12> Place sleeping bag and get some rest.", "[선택 사항] 일일 작업 완료\n<sprite=12>침낭을 놓고 휴식을 취하세요.");
+            //instructions = ReplaceIL(instructions, "<sprite=13> Find something to eat.\n<sprite=12> Talk to ", "<sprite=13> 먹을 것을 찾으세요.\n<sprite=12> 대화하기: ");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Find something to eat.\n<sprite=12> Talk to ", "<sprite=12> 먹을 것을 찾으세요.\n<sprite=12> 대화하기: ");
+            //instructions = ReplaceIL(instructions, "<sprite=13> Collect the requested items.\n<sprite=12> Bring items to ", "<sprite=13> 의뢰 아이템 수집\n<sprite=12> 아이템 가져가기: ");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Collect the requested items.", "<sprite=12> 의뢰 아이템 수집");
+            //instructions = ReplaceIL(instructions, "\n<sprite=12> Bring items to ", "\n<sprite=12> 아이템 가져가기: ");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Do some favours for John", "<sprite=12> John에게 호의를 베풀다");
+            //instructions = ReplaceIL(instructions, "<sprite=13> Do some favours for John", "<sprite=13> John에게 호의를 베풀다");
+            //instructions = ReplaceIL(instructions, "\n<sprite=12> Spend money or sell items in John's store", "\n<sprite=12> John의 상점에서 돈을 쓰거나 아이템 팔기");
+            //instructions = ReplaceIL(instructions, "\n<sprite=13> Spend money or sell items in John's store", "\n<sprite=13> John의 상점에서 돈을 쓰거나 아이템 팔기");
+            //instructions = ReplaceIL(instructions, "\n<sprite=12> Convince John to move in.", "\n<sprite=12> John이 이사오도록 설득하세요.");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Ask ", "<sprite=12> 물어보기 ");
+            //instructions = ReplaceIL(instructions, " about the town to apply for the ", "신청할 마을에 대해");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Place the ", "<sprite=12> 배치 ");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Wait for construction of the  ", "<sprite=12> 건설 대기");
+            //instructions = ReplaceIL(instructions, " to be completed", " 건설 완료");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Place the required items into the construction box at the deed site", "<sprite=12> 계약 장소의 건설 상자에 필요한 아이템을 넣습니다.");
+            //instructions = ReplaceIL(instructions, "<sprite=12> Place ", "<sprite=12> 배치 ");
+            //instructions = ReplaceIL(instructions, "<sprite=13> Place ", "<sprite=13> 배치 ");
+        //    return instructions;
+        //}
 
         [HarmonyTranspiler, HarmonyPatch(typeof(InventoryItemDescription), "fillItemDescription")]
         public static IEnumerable<CodeInstruction> InventoryItemDescription_fillItemDescription_Patch(IEnumerable<CodeInstruction> instructions)
@@ -442,23 +442,23 @@ namespace DinkumChinese
             instructions = ReplaceIL(instructions, "Winter", "겨울");
             instructions = ReplaceIL(instructions, "Spring", "봄");
             instructions = ReplaceIL(instructions, "Bury", "묻기");
-            instructions = ReplaceIL(instructions, "Speeds up certain production devices for up to 12 tiles", "최대 12개의 타일에 대해 특정 생산장치 속도향상");
-            instructions = ReplaceIL(instructions, "Reaches ", "도달범위 ");
-            instructions = ReplaceIL(instructions, " tiles out.\n<color=red>Requires Water Tank</color>", " 타일 벗어남.\n<color=red>물 탱크 필요</color>");
-            instructions = ReplaceIL(instructions, "Provides water to sprinklers ", "@");
-            instructions = ReplaceIL(instructions, " tiles out.", " 개의 타일 밖에 있는 스프링클러에 물을 공급합니다.");
-            instructions = ReplaceIL(instructions, "Fills animal feeders ", "동물 먹이통 채우기 ");
-            instructions = ReplaceIL(instructions, " tiles out.\n<color=red>Requires Animal Food</color>", " 타일 벗어남.\n<color=red>동물 사료 필요</color>");
+            //instructions = ReplaceIL(instructions, "Speeds up certain production devices for up to 12 tiles", "최대 12개의 타일에 대해 특정 생산장치 속도향상");
+            //instructions = ReplaceIL(instructions, "Reaches ", "도달범위 ");
+            //instructions = ReplaceIL(instructions, " tiles out.\n<color=red>Requires Water Tank</color>", " 타일 벗어남.\n<color=red>물 탱크 필요</color>");
+            //instructions = ReplaceIL(instructions, "Provides water to sprinklers ", "@");
+            //instructions = ReplaceIL(instructions, " tiles out.", " 개의 타일 밖에 있는 스프링클러에 물을 공급합니다.");
+            //instructions = ReplaceIL(instructions, "Fills animal feeders ", "동물 먹이통 채우기 ");
+            //instructions = ReplaceIL(instructions, " tiles out.\n<color=red>Requires Animal Food</color>", " 타일 벗어남.\n<color=red>동물 사료 필요</color>");
 
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(BugAndFishCelebration), "openWindow")]
-        public static IEnumerable<CodeInstruction> BugAndFishCelebration_openWindow_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "I caught a ", "잡았다 ");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(BugAndFishCelebration), "openWindow")]
+        //public static IEnumerable<CodeInstruction> BugAndFishCelebration_openWindow_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "I caught a ", "잡았다 ");
+        //    return instructions;
+        //}
 
         [HarmonyTranspiler, HarmonyPatch(typeof(TileObjectSettings), "getWhyCantPlaceDeedText")]
         public static IEnumerable<CodeInstruction> TileObjectSettings_getWhyCantPlaceDeedText_Patch(IEnumerable<CodeInstruction> instructions)
@@ -517,25 +517,25 @@ namespace DinkumChinese
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(NPCRequest), "getMissionText")]
-        public static IEnumerable<CodeInstruction> NPCRequest_getMissionText_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "<sprite=12> Bring ", "<sprite=12> 가져오기 ");
-            instructions = ReplaceIL(instructions, "<sprite=13> Collect ", "<sprite=13> 수집하기 ");
-            instructions = ReplaceIL(instructions, "\n<sprite=12> Bring ", "\n<sprite=12> 가져오기 ");
-            instructions = ReplaceIL(instructions, "<sprite=12> Collect ", "<sprite=12> 수집하기 ");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(NPCRequest), "getMissionText")]
+        //public static IEnumerable<CodeInstruction> NPCRequest_getMissionText_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "<sprite=12> Bring ", "<sprite=12> 가져다주기 ");
+        //    instructions = ReplaceIL(instructions, "<sprite=13> Collect ", "<sprite=13> 수집하기 ");
+        //    instructions = ReplaceIL(instructions, "\n<sprite=12> Bring ", "\n<sprite=12> 가져다주기 ");
+        //    instructions = ReplaceIL(instructions, "<sprite=12> Collect ", "<sprite=12> 수집하기 ");
+        //    return instructions;
+        //}
 
         [HarmonyTranspiler, HarmonyPatch(typeof(NPCRequest), "getDesiredItemName")]
         public static IEnumerable<CodeInstruction> NPCRequest_getDesiredItemName_Patch(IEnumerable<CodeInstruction> instructions)
         {
             instructions = ReplaceIL(instructions, "any bug", "아무 곤충");
             instructions = ReplaceIL(instructions, "any fish", "아무 생선");
-            instructions = ReplaceIL(instructions, "something to eat", "무언가 먹기");
-            instructions = ReplaceIL(instructions, "something you've made me at a cooking table", "무언가 조리대에서 요리하기");
-            instructions = ReplaceIL(instructions, "furniture", "가구 제작");
-            instructions = ReplaceIL(instructions, "clothing", "옷 제작");
+            instructions = ReplaceIL(instructions, "something to eat", "먹을거리");
+            instructions = ReplaceIL(instructions, "something you've made me at a cooking table", "조리대에서 요리한것");
+            instructions = ReplaceIL(instructions, "furniture", "가구");
+            instructions = ReplaceIL(instructions, "clothing", "옷");
             return instructions;
         }
 
@@ -572,14 +572,14 @@ namespace DinkumChinese
         [HarmonyTranspiler, HarmonyPatch(typeof(ExhibitSign), "updateMySign")]
         public static IEnumerable<CodeInstruction> ExhibitSign_updateMySign_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, "In this exhibit:", "전시되어 있는 생물은：");
+            instructions = ReplaceIL(instructions, "In this exhibit:", "전시품：");
             return instructions;
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(ConversationManager), "checkLineForReplacement")]
         public static IEnumerable<CodeInstruction> ConversationManager_checkLineForReplacement_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, "South City", "南部城市");
+            instructions = ReplaceIL(instructions, "South City", "사우스 시티");
             instructions = ReplaceIL(instructions, "Journal", "저널");
             instructions = ReplaceIL(instructions, "Licence", "면허증");
             instructions = ReplaceIL(instructions, "Licences", "면허증");
@@ -601,7 +601,7 @@ namespace DinkumChinese
             instructions = ReplaceIL(instructions, "The design just came to me, y'know?", "디자인이 딱 떠올랐죠?");
             instructions = ReplaceIL(instructions, "Y'know, that would look great on you, ", "그게 당신에게 잘어울립니다, ");
             instructions = ReplaceIL(instructions, "I put a lot of myself into this one.", "저는 이 작품에 많은 노력을 기울였습니다.");
-            instructions = ReplaceIL(instructions, "Beginning...", "처음에...");
+            instructions = ReplaceIL(instructions, "Beginning...", "말하자면...");
             instructions = ReplaceIL(instructions, "...Nothing happened...", "...별일 아닙니다...");
             instructions = ReplaceIL(instructions, "Permit Points", "면허 점수");
             instructions = ReplaceIL(instructions, "s", "");
@@ -611,7 +611,7 @@ namespace DinkumChinese
         [HarmonyTranspiler, HarmonyPatch(typeof(GiveNPC), "UpdateMenu", MethodType.Enumerator)]
         public static IEnumerable<CodeInstruction> GiveNPC_UpdateMenu_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, "Place", "위치");
+            instructions = ReplaceIL(instructions, "Place", "배치");
             instructions = ReplaceIL(instructions, "Donate", "기부");
             instructions = ReplaceIL(instructions, "Sell", "판매");
             instructions = ReplaceIL(instructions, "Cancel", "취소");
@@ -670,12 +670,12 @@ namespace DinkumChinese
         [HarmonyTranspiler, HarmonyPatch(typeof(LicenceManager), "openConfirmWindow")]
         public static IEnumerable<CodeInstruction> LicenceManager_openConfirmWindow_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, "Level ", "등급");
-            instructions = ReplaceIL(instructions, "You hold all ", "모두 보유중 ");
-            instructions = ReplaceIL(instructions, " levels", "허가 등급");
-            instructions = ReplaceIL(instructions, "Level up your ", "등급 업 ");
-            instructions = ReplaceIL(instructions, " skill to unlock further levels", " 기술을 사용하여 추가 등급 잠금해제");
-            instructions = ReplaceIL(instructions, "You hold all current ", "현재 보유중 ");
+            instructions = ReplaceIL(instructions, "Level ", "등급 ");
+            instructions = ReplaceIL(instructions, "You hold all ", "당신은 모든 ");
+            instructions = ReplaceIL(instructions, " levels", " 보유하고 있습니다");
+            instructions = ReplaceIL(instructions, "Level up your ", "");
+            instructions = ReplaceIL(instructions, " skill to unlock further levels", " 기술 등급을 올려서 추가 등급 잠금을 해제합니다");
+            instructions = ReplaceIL(instructions, "You hold all current ", "현재 모든 ");
             return instructions;
         }
 
@@ -683,8 +683,8 @@ namespace DinkumChinese
         public static IEnumerable<CodeInstruction> LicenceButton_fillButton_Patch(IEnumerable<CodeInstruction> instructions)
         {
             instructions = ReplaceIL(instructions, "Level ", "등급 ");
-            instructions = ReplaceIL(instructions, "Level up your ", "등급 업 ");
-            instructions = ReplaceIL(instructions, " skill to unlock further levels", " 기술을 사용하여 추가 등급 잠금해제");
+            instructions = ReplaceIL(instructions, "Level up your ", "");
+            instructions = ReplaceIL(instructions, " skill to unlock further levels", " 기술 등급을 올려서 추가 등급 잠금을 해제합니다");
             instructions = ReplaceIL(instructions, "Max Level", "최고 등급");
             instructions = ReplaceIL(instructions, "Not Held", "소유하지 않음");
             return instructions;
@@ -711,7 +711,7 @@ namespace DinkumChinese
         public static IEnumerable<CodeInstruction> MailManager_getSentByName_Patch(IEnumerable<CodeInstruction> instructions)
         {
             instructions = ReplaceIL(instructions, "Animal Research Centre", "동물 연구소");
-            instructions = ReplaceIL(instructions, "Dinkum Dev", "Dinkum개발자");
+            instructions = ReplaceIL(instructions, "Dinkum Dev", "Dinkum 개발자");
             instructions = ReplaceIL(instructions, "Fishin' Tipster", "낚시 가이드");
             instructions = ReplaceIL(instructions, "Bug Tipster", "곤충 가이드");
             instructions = ReplaceIL(instructions, "Unknown", "불명");
