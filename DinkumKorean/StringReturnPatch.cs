@@ -9,28 +9,28 @@ using HarmonyLib;
 using I2.Loc;
 using UnityEngine;
 
-namespace DinkumChinese
+namespace DinkumKorean
 {
     public static class StringReturnPatch
     {
         [HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameUnderMapCursor")]
         public static void GenerateMap_getBiomeNameUnderMapCursor_Patch(ref string __result)
         {
-            __result = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, __result.StrToI2Str());
+            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result.StrToI2Str());
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameById")]
         public static void GenerateMap_getBiomeNameById_Patch(ref string __result, int id)
         {
             GenerateMap.biomNames biomNames = (GenerateMap.biomNames)id;
-            __result = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, biomNames.ToString());
+            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, biomNames.ToString());
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(PostOnBoard), "getTitleText")]
         public static void PostOnBoard_getTitleText_Patch(PostOnBoard __instance, ref string __result, int postId)
         {
             string titleOri = __instance.getPostPostsById().title.StrToI2Str();
-            string title = TextLocData.GetLoc(DinkumChinesePlugin.Inst.PostTextLocList, titleOri);
+            string title = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.PostTextLocList, titleOri);
             __result = title.Replace("<boardRewardItem>",
                 __instance.getPostPostsById().getBoardRewardItem(postId)).Replace("<boardHuntRequestAnimal>",
                 __instance.getPostPostsById().getBoardHuntRequestAnimal(postId)).Replace("<boardRequestItem>",
@@ -41,7 +41,7 @@ namespace DinkumChinese
         public static void PostOnBoard_getContentText_Patch(PostOnBoard __instance, ref string __result, int postId)
         {
             string textOri = __instance.getPostPostsById().contentText.StrToI2Str();
-            string text = TextLocData.GetLoc(DinkumChinesePlugin.Inst.PostTextLocList, textOri);
+            string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.PostTextLocList, textOri);
             __result = text.Replace("<boardRewardItem>",
                 __instance.getPostPostsById().getBoardRewardItem(postId)).Replace("<boardHuntRequestAnimal>",
                 __instance.getPostPostsById().getBoardHuntRequestAnimal(postId)).Replace("<getAnimalsInPhotoList>",
@@ -186,7 +186,7 @@ namespace DinkumChinese
             if (__instance.isMainQuestButton)
             {
                 string nameOri = QuestManager.manage.allQuests[questNo].QuestName.StrToI2Str();
-                string name = TextLocData.GetLoc(DinkumChinesePlugin.Inst.QuestTextLocList, nameOri);
+                string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
                 __instance.buttonText.text = name;
             }
             else if (__instance.isQuestButton)
@@ -202,7 +202,7 @@ namespace DinkumChinese
         public static void QuestNotification_showQuest_Patch(QuestNotification __instance)
         {
             string nameOri = __instance.displayingQuest.QuestName.StrToI2Str();
-            string name = TextLocData.GetLoc(DinkumChinesePlugin.Inst.QuestTextLocList, nameOri);
+            string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
             __instance.QuestText.text = name;
         }
 
@@ -210,9 +210,9 @@ namespace DinkumChinese
         public static void QuestTracker_displayMainQuest_Patch(QuestTracker __instance, int questNo)
         {
             string nameOri = QuestManager.manage.allQuests[questNo].QuestName.StrToI2Str();
-            string name = TextLocData.GetLoc(DinkumChinesePlugin.Inst.QuestTextLocList, nameOri);
+            string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
             string descOri = QuestManager.manage.allQuests[questNo].QuestDescription.StrToI2Str();
-            string desc = TextLocData.GetLoc(DinkumChinesePlugin.Inst.QuestTextLocList, descOri).Replace("<IslandName>", Inventory.inv.islandName);
+            string desc = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, descOri).Replace("<IslandName>", Inventory.inv.islandName);
             __instance.questTitle.text = name;
             __instance.questDesc.text = KoreanCheck.ReplaceJosa(desc);
         }
@@ -225,7 +225,7 @@ namespace DinkumChinese
                 if (!QuestManager.manage.isQuestCompleted[id])
                 {
                     string nameOri = QuestManager.manage.allQuests[id].QuestName.StrToI2Str();
-                    string name = TextLocData.GetLoc(DinkumChinesePlugin.Inst.QuestTextLocList, nameOri);
+                    string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
                     string pinText = __instance.pinMissionText.text.Replace(QuestManager.manage.allQuests[id].QuestName, name);
                     __instance.pinMissionText.text = pinText;
                 }
@@ -238,7 +238,7 @@ namespace DinkumChinese
             if (___pinnedType == QuestTracker.typeOfTask.Quest)
             {
                 string nameOri = QuestManager.manage.allQuests[___pinnedId].QuestName;
-                string name = TextLocData.GetLoc(DinkumChinesePlugin.Inst.QuestTextLocList, nameOri);
+                string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
                 __instance.pinMissionText.text = name + "\n<size=11>" + QuestManager.manage.allQuests[___pinnedId].getMissionObjText();
             }
 
@@ -574,7 +574,7 @@ namespace DinkumChinese
         [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt")]
         public static void PickUpNotification_fillButtonPrompt_Patch(PickUpNotification __instance, string buttonPromptText)
         {
-            string text = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, buttonPromptText.Trim());
+            string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText.Trim());
             if (text.Contains("구입"))
             {
                 text = text.Replace("구입", "") + " 구입";
@@ -606,14 +606,14 @@ namespace DinkumChinese
         [HarmonyPostfix, HarmonyPatch(typeof(Licence), "getConnectedSkillName")]
         public static void Licence_getConnectedSkillName_Patch(ref string __result)
         {
-            __result = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, __result);
+            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(SeasonAndTime), "capitaliseFirstLetter")]
         public static bool SeasonAndTime_capitaliseFirstLetter_Patch(ref string __result, string toChange)
         {
             Debug.Log($"SeasonAndTime_capitaliseFirstLetter_Patch 1:{toChange}");
-            __result = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, toChange);
+            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, toChange);
             Debug.Log($"SeasonAndTime_capitaliseFirstLetter_Patch 2:{__result}");
             return false;
         }
@@ -639,20 +639,20 @@ namespace DinkumChinese
         [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomBugNoAndLocation")]
         public static void NPCRequest_setRandomBugNoAndLocation_Patch(NPCRequest __instance)
         {
-            __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
+            __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomFishNoAndLocation")]
         public static void NPCRequest_setRandomFishNoAndLocation_Patch(NPCRequest __instance)
         {
-            __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
+            __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(AnimalManager), "fillAnimalLocation")]
         public static void AnimalManager_fillAnimalLocation_Patch(ref string __result)
         {
             Debug.Log($"AnimalManager_fillAnimalLocation_Patch 1:{__result}");
-            __result = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, __result);
+            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
             Debug.Log($"AnimalManager_fillAnimalLocation_Patch 2:{__result}");
         }
 
@@ -660,7 +660,7 @@ namespace DinkumChinese
         public static bool AnimalManager_capitaliseFirstLetter_Patch(ref string __result, string toChange)
         {
             Debug.Log($"AnimalManager_capitaliseFirstLetter_Patch 1:{toChange}");
-            __result = TextLocData.GetLoc(DinkumChinesePlugin.Inst.DynamicTextLocList, toChange);
+            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, toChange);
             Debug.Log($"AnimalManager_capitaliseFirstLetter_Patch 2:{__result}");
             return false;
         }

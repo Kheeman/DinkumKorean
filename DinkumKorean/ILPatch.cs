@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
 
-namespace DinkumChinese
+namespace DinkumKorean
 {
     public static class ILPatch
     {

@@ -13,12 +13,12 @@ using XYModLib;
 using Newtonsoft.Json;
 using System;
 
-namespace DinkumChinese
+namespace DinkumKorean
 {
-    [BepInPlugin("xiaoye97.Dinkum.DinkumChinese", "DinkumChinese", "1.7.0")]
-    public class DinkumChinesePlugin : BaseUnityPlugin
+    [BepInPlugin("Kheeman.Dinkum.DinkumKorean", "DinkumKorean", "1.0.0")]
+    public class DinkumKoreanPlugin : BaseUnityPlugin
     {
-        public static DinkumChinesePlugin Inst;
+        public static DinkumKoreanPlugin Inst;
 
         public static bool Pause
         {
@@ -59,7 +59,7 @@ namespace DinkumChinese
             ErrorWindow.OnWinodwGUI = ErrorWindowFunc;
             try
             {
-                Harmony.CreateAndPatchAll(typeof(DinkumChinesePlugin));
+                Harmony.CreateAndPatchAll(typeof(DinkumKoreanPlugin));
                 Harmony.CreateAndPatchAll(typeof(ILPatch));
                 Harmony.CreateAndPatchAll(typeof(StringReturnPatch));
                 Harmony.CreateAndPatchAll(typeof(StartTranslatePatch));
@@ -235,7 +235,7 @@ namespace DinkumChinese
         [HarmonyPostfix, HarmonyPatch(typeof(OptionsMenu), "Start")]
         public static void OptionsMenuStartPatch()
         {
-            LocalizationManager.CurrentLanguage = "Chinese";
+            LocalizationManager.CurrentLanguage = "English";
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(RealWorldTimeLight), "setUpDayAndDate")]

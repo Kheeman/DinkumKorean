@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D08084CF-D29B-42B4-9CA2-FA822F139771}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>DinkumChinesePublishTool</RootNamespace>
-    <AssemblyName>DinkumChinesePublishTool</AssemblyName>
+    <RootNamespace>DinkumKoreanPublishTool</RootNamespace>
+    <AssemblyName>DinkumKoreanPublishTool</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

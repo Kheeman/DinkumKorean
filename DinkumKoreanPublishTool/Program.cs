@@ -8,7 +8,7 @@ using System.IO.Compression;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Checksum;
 
-namespace DinkumChinesePublishTool
+namespace DinkumKoreanPublishTool
 {
     internal class Program
     {
@@ -16,66 +16,66 @@ namespace DinkumChinesePublishTool
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
-            // 建立打包文件夹
-            DirectoryInfo buildDir = new DirectoryInfo("DinkumChinesePublish");
+            // 패키지 폴더 생성
+            DirectoryInfo buildDir = new DirectoryInfo("DinkumKoreanPublish");
             if (buildDir.Exists)
             {
                 buildDir.Delete(true);
             }
             buildDir.Create();
-            DirectoryInfo buildDir1 = new DirectoryInfo("DinkumChinesePublish/DinkumChinese");
+            DirectoryInfo buildDir1 = new DirectoryInfo("DinkumKoreanPublish/DinkumKorean");
             if (buildDir1.Exists)
             {
                 buildDir1.Delete(true);
             }
             buildDir1.Create();
-            DirectoryInfo buildDir2 = new DirectoryInfo("DinkumChinesePublish/DinkumChinese_WithBepInEx");
+            DirectoryInfo buildDir2 = new DirectoryInfo("DinkumKoreanPublish/DinkumKorean_WithBepInEx");
             if (buildDir2.Exists)
             {
                 buildDir2.Delete(true);
             }
             buildDir2.Create();
-            // 不带Bep的版本
-            Console.WriteLine("开始打包不带Bep的版本...");
-            // 复制配置文件
-            CopyFile("BepInEx/config/xiaoye97.I2LocPatch.cfg", "DinkumChinesePublish/DinkumChinese/BepInEx/config/xiaoye97.I2LocPatch.cfg");
-            CopyFile("BepInEx/config/xiaoye97.I18NFont4UnityGame.cfg", "DinkumChinesePublish/DinkumChinese/BepInEx/config/xiaoye97.I18NFont4UnityGame.cfg");
-            // 复制插件
-            CopyFile("BepInEx/plugins/DinkumChinese.dll", "DinkumChinesePublish/DinkumChinese/BepInEx/plugins/DinkumChinese.dll");
-            CopyFile("BepInEx/plugins/I2LocPatch.dll", "DinkumChinesePublish/DinkumChinese/BepInEx/plugins/I2LocPatch.dll");
-            CopyFile("BepInEx/plugins/I18NFont4UnityGame.dll", "DinkumChinesePublish/DinkumChinese/BepInEx/plugins/I18NFont4UnityGame.dll");
-            CopyFile("BepInEx/plugins/XYModLib.dll", "DinkumChinesePublish/DinkumChinese/BepInEx/plugins/XYModLib.dll");
-            CopyFile("BepInEx/plugins/Newtonsoft.Json.dll", "DinkumChinesePublish/DinkumChinese/BepInEx/plugins/Newtonsoft.Json.dll");
-            // 复制字体和文本
-            CopyDirectory("BepInEx/plugins/I2LocPatch", "DinkumChinesePublish/DinkumChinese/BepInEx/plugins/I2LocPatch");
-            CopyDirectory("BepInEx/plugins/I18NFont4UnityGame", "DinkumChinesePublish/DinkumChinese/BepInEx/plugins/I18NFont4UnityGame");
-            // 文件夹压缩
-            Console.WriteLine("开始压缩不带Bep的版本...");
-            ZipFile("DinkumChinesePublish/DinkumChinese", "DinkumChinese_V1_X_0.zip");
+            // Bep 없는 버전
+            Console.WriteLine("BepInEx 없는 버전 패키징 시작...");
+            // 구성 파일 복사
+            CopyFile("BepInEx/config/xiaoye97.I2LocPatch.cfg", "DinkumKoreanPublish/DinkumKorean/BepInEx/config/xiaoye97.I2LocPatch.cfg");
+            CopyFile("BepInEx/config/xiaoye97.I18NFont4UnityGame.cfg", "DinkumKoreanPublish/DinkumKorean/BepInEx/config/xiaoye97.I18NFont4UnityGame.cfg");
+            // 플러그인 복사
+            CopyFile("BepInEx/plugins/DinkumKorean.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/DinkumKorean.dll");
+            CopyFile("BepInEx/plugins/I2LocPatch.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/I2LocPatch.dll");
+            CopyFile("BepInEx/plugins/I18NFont4UnityGame.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/I18NFont4UnityGame.dll");
+            CopyFile("BepInEx/plugins/XYModLib.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/XYModLib.dll");
+            CopyFile("BepInEx/plugins/Newtonsoft.Json.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/Newtonsoft.Json.dll");
+            // 글꼴 및 텍스트 복사
+            CopyDirectory("BepInEx/plugins/I2LocPatch", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/I2LocPatch");
+            CopyDirectory("BepInEx/plugins/I18NFont4UnityGame", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/I18NFont4UnityGame");
+            // 폴더 압축
+            Console.WriteLine("BepInEx 없는 버전 압축 시작...");
+            ZipFile("DinkumKoreanPublish/DinkumKorean", "DinkumKorean_V1_X_0.zip");
 
-            // 带Bep的版本
-            Console.WriteLine("开始打包带Bep的版本...");
-            // 复制BepInEx
-            CopyDirectory("BepInEx/core", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/core");
-            CopyFile("doorstop_config.ini", "DinkumChinesePublish/DinkumChinese_WithBepInEx/doorstop_config.ini");
-            CopyFile("winhttp.dll", "DinkumChinesePublish/DinkumChinese_WithBepInEx/winhttp.dll");
-            // 复制配置文件
-            CopyFile("BepInEx/config/xiaoye97.I2LocPatch.cfg", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/config/xiaoye97.I2LocPatch.cfg");
-            CopyFile("BepInEx/config/xiaoye97.I18NFont4UnityGame.cfg", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/config/xiaoye97.I18NFont4UnityGame.cfg");
-            // 复制插件
-            CopyFile("BepInEx/plugins/DinkumChinese.dll", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/plugins/DinkumChinese.dll");
-            CopyFile("BepInEx/plugins/I2LocPatch.dll", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/plugins/I2LocPatch.dll");
-            CopyFile("BepInEx/plugins/I18NFont4UnityGame.dll", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/plugins/I18NFont4UnityGame.dll");
-            CopyFile("BepInEx/plugins/XYModLib.dll", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/plugins/XYModLib.dll");
-            CopyFile("BepInEx/plugins/Newtonsoft.Json.dll", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/plugins/Newtonsoft.Json.dll");
-            // 复制字体和文本
-            CopyDirectory("BepInEx/plugins/I2LocPatch", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/plugins/I2LocPatch");
-            CopyDirectory("BepInEx/plugins/I18NFont4UnityGame", "DinkumChinesePublish/DinkumChinese_WithBepInEx/BepInEx/plugins/I18NFont4UnityGame");
-            // 文件夹压缩
-            Console.WriteLine("开始压缩带Bep的版本...");
-            ZipFile("DinkumChinesePublish/DinkumChinese_WithBepInEx", "DinkumChinese_V1_X_0_WithBepInEx.zip");
+            // Bep 버전
+            Console.WriteLine("BepInEx버전 패키징 시작...");
+            // CopyBepInEx
+            CopyDirectory("BepInEx/core", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/core");
+            CopyFile("doorstop_config.ini", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/doorstop_config.ini");
+            CopyFile("winhttp.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/winhttp.dll");
+            // 구성 파일 복사
+            CopyFile("BepInEx/config/xiaoye97.I2LocPatch.cfg", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/config/xiaoye97.I2LocPatch.cfg");
+            CopyFile("BepInEx/config/xiaoye97.I18NFont4UnityGame.cfg", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/config/xiaoye97.I18NFont4UnityGame.cfg");
+            // 플러그인 복사
+            CopyFile("BepInEx/plugins/DinkumKorean.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/DinkumKorean.dll");
+            CopyFile("BepInEx/plugins/I2LocPatch.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/I2LocPatch.dll");
+            CopyFile("BepInEx/plugins/I18NFont4UnityGame.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/I18NFont4UnityGame.dll");
+            CopyFile("BepInEx/plugins/XYModLib.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/XYModLib.dll");
+            CopyFile("BepInEx/plugins/Newtonsoft.Json.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/Newtonsoft.Json.dll");
+            // 글꼴 및 텍스트 복사
+            CopyDirectory("BepInEx/plugins/I2LocPatch", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/I2LocPatch");
+            CopyDirectory("BepInEx/plugins/I18NFont4UnityGame", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/I18NFont4UnityGame");
+            // 폴더 압축
+            Console.WriteLine("BepInEx버전 압축 시작...");
+            ZipFile("DinkumKoreanPublish/DinkumKorean_WithBepInEx", "DinkumKorean_V1_X_0_WithBepInEx.zip");
             sw.Stop();
-            Console.WriteLine($"执行完毕，共耗时{sw.ElapsedMilliseconds}ms");
+            Console.WriteLine($"실행완료, 총 시간{sw.ElapsedMilliseconds}ms");
             Console.ReadLine();
         }
 
@@ -89,33 +89,33 @@ namespace DinkumChinesePublishTool
                 }
                 if (ignoreDirs == null) ignoreDirs = new List<string>();
                 if (ignoreFiles == null) ignoreFiles = new List<string>();
-                DirectoryInfo dir = new DirectoryInfo(srcPath); FileSystemInfo[] fileinfo = dir.GetFileSystemInfos();  //获取目录下（不包含子目录）的文件和子目录
+                DirectoryInfo dir = new DirectoryInfo(srcPath); FileSystemInfo[] fileinfo = dir.GetFileSystemInfos();  //디렉토리 아래의 파일 및 하위 디렉토리 가져오기(하위 디렉토리 제외)
                 foreach (FileSystemInfo i in fileinfo)
                 {
-                    // 判断是否文件夹
+                    // 폴더인지 확인
                     if (i is DirectoryInfo)
                     {
-                        // 检查是否需要忽略，是的话就跳过
+                        // 무시해야 하는지 확인하고, 무시해야 하는 경우 건너뜀.
                         if (ignoreDirs.Contains(i.Name))
                         {
                             continue;
                         }
                         if (!Directory.Exists(destPath + "\\" + i.Name))
                         {
-                            // 目标目录下不存在此文件夹即创建子文件夹
+                            // 이 폴더가 대상 디렉터리에 없으면 하위 폴더를 만듭니다.
                             Directory.CreateDirectory(destPath + "\\" + i.Name);
                         }
-                        // 递归调用复制子文件夹
+                        // 하위 폴더 복사를 위한 재귀 호출
                         CopyDirectory(i.FullName, destPath + "\\" + i.Name, ignoreDirs, ignoreFiles);
                     }
                     else
                     {
-                        // 检查是否需要忽略，是的话就跳过
+                        // 무시해야 하는지 확인하고, 무시해야 하는 경우 건너뜀.
                         if (ignoreFiles.Contains(i.Name))
                         {
                             continue;
                         }
-                        // 不是文件夹即复制文件，true表示可以覆盖同名文件
+                        // 폴더가 아닌 경우 파일을 복사하고 true는 동일한 이름의 파일을 덮어쓸 수 있음을 의미합니다.
                         File.Copy(i.FullName, destPath + "\\" + i.Name, true);
                     }
                 }
@@ -135,13 +135,13 @@ namespace DinkumChinesePublishTool
                     Directory.CreateDirectory(destPath);
                 }
                 if (fileContainsName == null) fileContainsName = new List<string>();
-                DirectoryInfo dir = new DirectoryInfo(srcPath); FileSystemInfo[] fileinfo = dir.GetFileSystemInfos();  //获取目录下（不包含子目录）的文件和子目录
+                DirectoryInfo dir = new DirectoryInfo(srcPath); FileSystemInfo[] fileinfo = dir.GetFileSystemInfos();  //디렉토리 아래의 파일 및 하위 디렉토리 가져오기(하위 디렉토리 제외)
                 foreach (FileSystemInfo i in fileinfo)
                 {
                     if (i is FileInfo)
                     {
                         bool canCopy = false;
-                        // 检查是否需要复制
+                        // 복사가 필요한지 확인
                         foreach (var name in fileContainsName)
                         {
                             if (i.Name.Contains(name))
@@ -152,7 +152,7 @@ namespace DinkumChinesePublishTool
                         }
                         if (canCopy)
                         {
-                            // 不是文件夹即复制文件，true表示可以覆盖同名文件
+                            // 폴더가 아닌 경우 파일을 복사하고 true는 동일한 이름의 파일을 덮어쓸 수 있음을 의미합니다.
                             File.Copy(i.FullName, destPath + "\\" + i.Name, true);
                         }
                     }

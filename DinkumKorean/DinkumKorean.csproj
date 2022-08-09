@@ -7,8 +7,8 @@
     <ProjectGuid>{38D2D534-00BF-4F3E-AC43-9B79F870F3E7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DinkumChinese</RootNamespace>
-    <AssemblyName>DinkumChinese</AssemblyName>
+    <RootNamespace>DinkumKorean</RootNamespace>
+    <AssemblyName>DinkumKorean</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -114,7 +114,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DinkumChinese.cs" />
+    <Compile Include="DinkumKorean.cs" />
     <Compile Include="ILPatch.cs" />
     <Compile Include="KoreanCheck.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
