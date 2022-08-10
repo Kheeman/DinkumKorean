@@ -9,11 +9,11 @@ namespace DinkumKorean
 {
     public class KoreanCheck
     {
-
         public class Josa
         {
             public Regex JosaRegex = new Regex(@"\(이\)가|\(와\)과|\(을\)를|\(은\)는|\(아\)야|\(이\)여|\(으\)로|\(이\)라");
-            public Regex FindRegex = new Regex(@"(\S*)([\w가-힣0-9])(\([\w가-힣0-9]\))([\w가-힣0-9])");
+            public Regex FindRegex = new Regex(@"(\S*)([\w가-힣0-9>])(\([\w가-힣0-9]\))([\w가-힣0-9])");
+            public Regex CheckRegex = new Regex(@"\>?(\S[^><]*)\<{1}");
             public Regex EngRegex = new Regex(@"^[mn]|\S[mn]e?|\S(?:[aeiom]|lu)b|(?:u|\S[aei]|[^o]o)p|(?:^i|[^auh]i|\Su|[^ei][ae]|[^oi]o)t|(?:\S[iou]|[^e][ae])c?k|\S[aeiou](?:c|ng)|foot|go+d|b[ai]g|private|^(?:app|kor)");
             public Regex EngRegex2 = new Regex(@"^[lr]|^\Sr|\Sle?|check|[hm]ook|limit");
 
@@ -57,7 +57,6 @@ namespace DinkumKorean
                     var josaMatches = JosaRegex.Matches(findMatch.Value);
                     string engCheck = findMatch.Value.Replace(josaMatches[0].Value, "");
                     int index = 0;
-                    //lastHeadIndex = findMatch.Index;
                     foreach (Match josaMatch in josaMatches)
                     {
                         var josaPair = _josaPatternPaird[josaMatch.Value];
@@ -66,6 +65,12 @@ namespace DinkumKorean
                         if (index > 0)
                         {
                             var prevChar = src[index - 1];
+                            var check = CheckRegex.Match(findMatch.Value);
+                            if (prevChar == '>' && check.Length > 0)
+                            {
+                                prevChar = check.Groups[1].Value[check.Groups[1].Length - 1];
+                                engCheck = check.Groups[1].Value;
+                            }
                             if ((HasJong(prevChar, engCheck) && josaMatch.Value != "(으)로") ||
                                 (HasJongExceptRieul(prevChar, engCheck) && josaMatch.Value == "(으)로"))
 
@@ -99,8 +104,13 @@ namespace DinkumKorean
                 else if ((0x61 <= inChar && inChar <= 0x7A) || (0x41 <= inChar && inChar <= 0x5A))
                 {
                     var matches = _josa.EngRegex.Matches(inString);
+                    bool ret;
                     foreach (Match matche in matches)
-                        return matche.Value.LastIndexOf(inChar) > 0 ? true : false;
+                    {
+                        if (inString.Length == matche.Index + matche.Length)
+                            return true;
+                    }
+                    return false;
                 }
                 else if (inChar == 0x0030 || inChar == 0x0031 || inChar == 0x0033 || inChar == 0x0036 || inChar == 0x0037 || inChar == 0x0038) //0, 1, 3, 6, 7, 8)
                     return true;
@@ -120,7 +130,11 @@ namespace DinkumKorean
                 {
                     var matches = _josa.EngRegex2.Matches(inString);
                     foreach (Match matche in matches)
-                        return matche.Value.LastIndexOf(inChar) > 0 ? false : true;
+                    {
+                        if (inString.Length == matche.Index + matche.Length)
+                            return true;
+                    }
+                    return false;
                 }
                 return false;
             }

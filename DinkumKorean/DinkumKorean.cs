@@ -235,7 +235,7 @@ namespace DinkumKorean
         [HarmonyPostfix, HarmonyPatch(typeof(OptionsMenu), "Start")]
         public static void OptionsMenuStartPatch()
         {
-            LocalizationManager.CurrentLanguage = "English";
+            LocalizationManager.CurrentLanguage = "Chinese";
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(RealWorldTimeLight), "setUpDayAndDate")]

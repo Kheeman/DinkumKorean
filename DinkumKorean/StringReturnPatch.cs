@@ -48,22 +48,13 @@ namespace DinkumKorean
                 __instance.getPostPostsById().getRequirementsNeededInPhoto(postId)).Replace("<boardRequestItem>",
                 __instance.getPostPostsById().getBoardRequestItem(postId));
         }
-
-        ////??
-        //[HarmonyPostfix, HarmonyPatch(typeof(MailManager), "showLetter")]
-        //public static void PostOnBoard_showLetter_Patch(MailManager __instance)
-        //{
-        //    __instance.letterText.text = KoreanCheck.ReplaceJosa(__instance.letterText.text);
-        //}
-
+        
         //ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(ConversationManager), "readConversationSegment")]
-        public static void ConversationManager_readConversationSegment(ConversationManager __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(ConversationManager), "checkLineForReplacement")]
+        public static void ConversationManager_checkLineForReplacement(ConversationManager __instance, ref string __result)
         {
-            string text = __instance.conversationTextPro.text;
-            __instance.conversationTextPro.text = KoreanCheck.ReplaceJosa(text);
+            __result = KoreanCheck.ReplaceJosa(__result);
         }
-
 
         [HarmonyPostfix, HarmonyPatch(typeof(AnimalHouseMenu), "openConfirm")]
         public static void AnimalHouseMenu_openConfirm_Patch(AnimalHouseMenu __instance, ref FarmAnimalDetails ___showingAnimal)
@@ -643,6 +634,18 @@ namespace DinkumKorean
         public static void NPCRequest_setRandomFishNoAndLocation_Patch(NPCRequest __instance)
         {
             __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
+        }
+
+        // ADD
+        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "getDesiredItemNameByNumber")]
+        public static void NPCRequest_getDesiredItemNameByNumber_Patch(int invId, int amount, ref string __result)
+        {
+            __result = Inventory.inv.allItems[invId].getInvItemName() + " " + amount + "개";
+
+            if (amount == 1)
+            {
+                __result = Inventory.inv.allItems[invId].getInvItemName();
+            }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(AnimalManager), "fillAnimalLocation")]
