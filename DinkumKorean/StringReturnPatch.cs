@@ -271,28 +271,24 @@ namespace DinkumKorean
             if (attachedPosts[missionNo].isTrade)
             {
                 text = attachedPosts[missionNo].getPostPostsById().getBoardRequestItem(missionNo) + "(와)과 " + attachedPosts[missionNo].getPostedByName() + "교환하기";
-                text = KoreanCheck.ReplaceJosa(text);
             }
 
             if (attachedPosts[missionNo].isHuntingTask)
             {
+                text = "<sprite=12> 지도에서 마지막으로 알려진 위치를 이용해서 " + postPostsById.getBoardHuntRequestAnimal(missionNo) + "(을)를 사냥하세요";
+
                 if (attachedPosts[missionNo].readyForNPC)
                 {
                     text = "<sprite=12> " + attachedPosts[missionNo].getPostedByName() + "(와)과 대화하기";
-                    text = KoreanCheck.ReplaceJosa(text);
                 }
-
-                text = "<sprite=12> 지도에서 마지막으로 알려진 위치를 이용해서 " + postPostsById.getBoardHuntRequestAnimal(missionNo) + "(을)를 사냥하세요";
-                text = KoreanCheck.ReplaceJosa(text);
             }
 
             if (attachedPosts[missionNo].isInvestigation)
             {
                 text = "<sprite=13> 지도의 위치를 방문하여 조사하세요";
-                text = KoreanCheck.ReplaceJosa(text);
             }
 
-            __result = text;
+            __result = KoreanCheck.ReplaceJosa(text);
         }
 
         //ADD
@@ -627,12 +623,13 @@ namespace DinkumKorean
             if (__instance.specificDesiredItem != -1)
             {
                 string text = " [" + __instance.checkAmountOfItemsInInv() + "/" + __instance.desiredAmount + "]";
+
+                __result = "<sprite=12> " + __instance.getDesiredItemName() + " 수집하기" + text + "\n<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
+
                 if (__instance.checkAmountOfItemsInInv() >= __instance.desiredAmount)
                 {
                     __result = "<sprite=13> " + __instance.getDesiredItemName() + " 수집하기" + text + "\n<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
                 }
-
-                __result = "<sprite=12> " + __instance.getDesiredItemName() + " 수집하기" + text + "\n<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
             }
         }
 
