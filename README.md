@@ -36,5 +36,5 @@ Dinkum 한국어화
 [7]: https://github.com/xiaoye97/I18NFont4UnityGame
 [8]: https://github.com/xiaoye97/DinkumChinese/releases
 [9]: https://www.bilibili.com/video/BV1TW4y127rq
-[10]: preview1.png
-[11]: preview2.png
+[10]: view1.png
+[11]: view2.png
