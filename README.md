@@ -37,7 +37,7 @@ Dinkum 한국어화
 [5]: https://github.com/BepInEx/BepInEx
 [6]: https://github.com/xiaoye97/I2LocPatch
 [7]: https://github.com/xiaoye97/I18NFont4UnityGame
-[8]: https://github.com/xiaoye97/DinkumKorean/releases
+[8]: https://github.com/Kheeman/DinkumKorean/releases
 [9]: https://www.bilibili.com/video/BV1TW4y127rq
 [10]: view1.png
 [11]: view2.png
