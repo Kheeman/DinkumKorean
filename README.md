@@ -9,7 +9,10 @@ Dinkum 한국어화
 - BepInEx모드 사용중이면 없는 버전을 받고 아니면 with 버전을 받습니다.
 - (기존에 사용중인 모드와 충돌이 날수 있습니다 한국어화에 사용된것은 BepInEx6 버전입니다)
 - 게임이 설치된 최상위 폴더에 압축을 풀고 게임 실행하시면 됩니다.
-![패치][12]
+<img src="/patch.png" width="60%" height="60%">
+ 
+- 게임\BepInEx\plugins\I2LocPatch 폴더에 언어파일이 있습니다 
+- 번역내용 수정하고 싶은분은 자유롭게 수정하시면 됩니다
 
 
 ## 실행화면
@@ -41,4 +44,3 @@ Dinkum 한국어화
 [9]: https://www.bilibili.com/video/BV1TW4y127rq
 [10]: view1.png
 [11]: view2.png
-[12]: patch.png
