@@ -53,7 +53,7 @@ namespace DinkumKorean
             Inst = this;
             DevMode = Config.Bind<bool>("Dev", "DevMode", false, "개발 모드에서 단축키를 눌러 개발 모드를 트리거할 수 있습니다.");
             DontLoadLocOnDevMode = Config.Bind<bool>("Dev", "DontLoadLocOnDevMode", true, "개발 모드에서는 DynamicText Post Quest 번역이 로드되지 않아 덤핑에 편리합니다.");
-            DebugWindow = new UIWindow("언어 테스트 도구 [Ctrl+키보드 4]");
+            DebugWindow = new UIWindow("언어 테스트 도구 [Ctrl+Numpad 4]");
             DebugWindow.OnWinodwGUI = DebugWindowGUI;
             ErrorWindow = new UIWindow("언어 오류");
             ErrorWindow.OnWinodwGUI = ErrorWindowFunc;
@@ -190,7 +190,7 @@ namespace DinkumKorean
             {
                 DumpAnimals();
             }
-            if (GUILayout.Button("번역된 키가 없는 항목 덤프(미완성)"))
+            if (GUILayout.Button("번역된 키가 없는 아이템 덤프(미완성)"))
             {
                 DumpAllUnTermItem();
             }
