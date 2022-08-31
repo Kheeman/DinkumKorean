@@ -12,6 +12,7 @@ using BepInEx.Configuration;
 using XYModLib;
 using Newtonsoft.Json;
 using System;
+using I2LocPatch;
 
 namespace DinkumKorean
 {
@@ -36,6 +37,7 @@ namespace DinkumKorean
 
         public ConfigEntry<bool> DevMode;
         public ConfigEntry<bool> DontLoadLocOnDevMode;
+        public ConfigEntry<bool> LogNoTranslation;
 
         public List<TextLocData> DynamicTextLocList = new List<TextLocData>();
         public List<TextLocData> PostTextLocList = new List<TextLocData>();
@@ -47,6 +49,7 @@ namespace DinkumKorean
         public UIWindow DebugWindow;
         public UIWindow ErrorWindow;
         public string ErrorStr;
+        public bool IsPluginLoaded;
 
         private void Awake()
         {
@@ -63,6 +66,7 @@ namespace DinkumKorean
                 Harmony.CreateAndPatchAll(typeof(ILPatch));
                 Harmony.CreateAndPatchAll(typeof(StringReturnPatch));
                 Harmony.CreateAndPatchAll(typeof(StartTranslatePatch));
+                Harmony.CreateAndPatchAll(typeof(SpritePatch));
             }
             catch (ExecutionEngineException ex)
             {
@@ -78,12 +82,18 @@ namespace DinkumKorean
             {
                 return;
             }
+            Invoke("LogFlagTrue", 2f);
             DynamicTextLocList = TextLocData.LoadFromTxtFile($"{Paths.PluginPath}/I2LocPatch/DynamicTextLoc.txt");
             PostTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/PostTextLoc.json");
             QuestTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/QuestTextLoc.json");
             TipsTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/TipsTextLoc.json");
             MailTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/MailTextLoc.json");
             AnimalsTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/AnimalsTextLoc.json");
+        }
+
+        public void LogFlagTrue()
+        {
+            IsPluginLoaded = true;
         }
 
         public void ErrorWindowFunc()
@@ -326,6 +336,18 @@ namespace DinkumKorean
             return false;
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(LocalizationManager), "TryGetTranslation")]
+        public static void Localize_OnLocalize(string Term, bool __result)
+        {
+            if (Inst.IsPluginLoaded && Inst.LogNoTranslation.Value)
+            {
+                if (!__result)
+                {
+                    Debug.LogWarning($"LocalizationManager获取翻译失败:Term:{Term}");
+                }
+            }
+        }
+
         public static Queue<TextMeshProUGUI> waitShowTMPs = new Queue<TextMeshProUGUI>();
 
         /// <summary>
@@ -459,11 +481,18 @@ namespace DinkumKorean
 
         public void DumpAllConversation()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Key\tEnglish");
-            var cs = Resources.FindObjectsOfTypeAll<Conversation>();
-            List<string> trems = new List<string>();
-            foreach (var c in cs)
+            List<Conversation> conversations = new List<Conversation>();
+            // 直接从资源搜索单独的Conversation
+            conversations.AddRange(Resources.FindObjectsOfTypeAll<Conversation>());
+
+            //StringBuilder sb = new StringBuilder();
+            //sb.AppendLine($"Key\tEnglish");
+            List<string> terms = new List<string>();
+            I2File i2File = new I2File();
+            i2File.Name = "NoTermConversation";
+            i2File.Languages = new List<string>() { "English" };
+
+            foreach (var c in conversations)
             {
                 // Intro
                 for (int i = 0; i < c.startLineAlt.aConverstationSequnce.Length; i++)
@@ -473,17 +502,21 @@ namespace DinkumKorean
                     {
                         if (!string.IsNullOrWhiteSpace(c.startLineAlt.aConverstationSequnce[i]))
                         {
-                            string trem = $"{key}_{c.startLineAlt.aConverstationSequnce[i].GetHashCode()}";
-                            string line = $"{trem}\t{c.startLineAlt.aConverstationSequnce[i].StrToI2Str()}";
-                            if (trems.Contains(trem))
+                            string term = $"{key}_{c.startLineAlt.aConverstationSequnce[i].GetHashCode()}";
+                            string line = $"{term}\t{c.startLineAlt.aConverstationSequnce[i].StrToI2Str()}";
+                            if (terms.Contains(term))
                             {
                                 string log = $"중복 대사 무시. {line}";
                                 Logger.LogError(log);
                             }
                             else
                             {
-                                trems.Add(trem);
-                                sb.AppendLine(line);
+                                terms.Add(term);
+                                TermLine termLine = new TermLine();
+                                termLine.Name = term;
+                                termLine.Texts = new string[] { c.startLineAlt.aConverstationSequnce[i] };
+                                i2File.Lines.Add(termLine);
+                                //sb.AppendLine(line);
                                 LogInfo(line);
                             }
                         }
@@ -499,17 +532,21 @@ namespace DinkumKorean
                         {
                             if (!string.IsNullOrWhiteSpace(c.optionNames[j]))
                             {
-                                string trem = $"{key}_{c.optionNames[j].GetHashCode()}";
-                                string line = $"{trem}\t{c.optionNames[j].StrToI2Str()}";
-                                if (trems.Contains(trem))
+                                string term = $"{key}_{c.optionNames[j].GetHashCode()}";
+                                string line = $"{term}\t{c.optionNames[j].StrToI2Str()}";
+                                if (terms.Contains(term))
                                 {
                                     string log = $"중복 대사 무시. {line}";
                                     Logger.LogError(log);
                                 }
                                 else
                                 {
-                                    trems.Add(trem);
-                                    sb.AppendLine(line);
+                                    terms.Add(term);
+                                    //sb.AppendLine(line);
+                                    TermLine termLine = new TermLine();
+                                    termLine.Name = term;
+                                    termLine.Texts = new string[] { c.optionNames[j] };
+                                    i2File.Lines.Add(termLine);
                                     LogInfo(line);
                                 }
                             }
@@ -526,17 +563,21 @@ namespace DinkumKorean
                         {
                             if (!string.IsNullOrWhiteSpace(c.responesAlt[k].aConverstationSequnce[l]))
                             {
-                                string trem = $"{key}_{c.responesAlt[k].aConverstationSequnce[l].GetHashCode()}";
-                                string line = $"{trem}\t{c.responesAlt[k].aConverstationSequnce[l].StrToI2Str()}";
-                                if (trems.Contains(trem))
+                                string term = $"{key}_{c.responesAlt[k].aConverstationSequnce[l].GetHashCode()}";
+                                string line = $"{term}\t{c.responesAlt[k].aConverstationSequnce[l].StrToI2Str()}";
+                                if (terms.Contains(term))
                                 {
                                     string log = $"중복 대사 무시. {line}";
                                     Logger.LogError(log);
                                 }
                                 else
                                 {
-                                    trems.Add(trem);
-                                    sb.AppendLine(line);
+                                    terms.Add(term);
+                                    //sb.AppendLine(line);
+                                    TermLine termLine = new TermLine();
+                                    termLine.Name = term;
+                                    termLine.Texts = new string[] { c.responesAlt[k].aConverstationSequnce[l] };
+                                    i2File.Lines.Add(termLine);
                                     LogInfo(line);
                                 }
                             }
@@ -544,7 +585,8 @@ namespace DinkumKorean
                     }
                 }
             }
-            File.WriteAllText($"{Paths.GameRootPath}/I2/NoTermConversation.csv", sb.ToString());
+            i2File.WriteCSVTable($"{Paths.GameRootPath}/I2/{i2File.Name}.csv");
+            LogInfo($"Dump {i2File.Name}完毕");
         }
 
         public void DumpAllPost()
@@ -671,22 +713,5 @@ namespace DinkumKorean
         }
 
         #endregion Dump
-    }
-
-    public static class TextEx
-    {
-        public static string newLineChar = "þ";
-
-        public static string StrToI2Str(this string str)
-        {
-            if (string.IsNullOrWhiteSpace(str)) return str;
-            return str.Replace("\n", newLineChar).Replace("\r", newLineChar);
-        }
-
-        public static string I2StrToStr(this string str)
-        {
-            if (string.IsNullOrWhiteSpace(str)) return str;
-            return str.Replace(newLineChar, "\n");
-        }
     }
 }
