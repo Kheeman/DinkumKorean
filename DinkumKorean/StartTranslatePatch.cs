@@ -18,7 +18,7 @@ namespace DinkumKorean
             var mgr = AnimalManager.manage;
             foreach (var a in mgr.allAnimals)
             {
-                a.animalName = TextLocData.GetLoc(DinkumChinesePlugin.Inst.AnimalsTextLocList, a.animalName);
+                a.animalName = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.AnimalsTextLocList, a.animalName);
             }
         }
 

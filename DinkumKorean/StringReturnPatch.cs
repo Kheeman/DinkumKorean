@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using I2.Loc;
 using UnityEngine;
+using I2LocPatch;
 
 namespace DinkumKorean
 {
@@ -675,46 +676,50 @@ namespace DinkumKorean
                 string text2 = "";
                 if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
                 {
-                    text2 = "모든 계절 ";
+                    text2 = "모든 계절";
                 }
                 else
                 {
-                    text2 += "에";
+                    bool flag = false;
                     if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer)
                     {
-                        text2 = "여름" + text2;
+                        text2 = "여름";
+                        flag = true;
                     }
                     if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
                     {
-                        if (text2 != "에")
+                        if (flag)
                         {
-                            text2 = text2.Insert(text2.Length - 2, "과 ");
+                            text2 = text2 + ", 가을";
                         }
-                        text2 = text2.Insert(text2.Length - 2, "가을");
+                        else
+                            text2 = "가을";
 
                     }
                     if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter)
                     {
-                        if (text2 != "에")
+                        if (flag)
                         {
-                            text2 = text2.Insert(text2.Length - 2, "과 ");
+                            text2 = text2 + ", 겨울";
                         }
-                        text2 = text2.Insert(text2.Length - 2, "겨울");
+                        else
+                            text2 = "겨울";
 
                     }
                     if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring)
                     {
-                        if (text2 != "에")
+                        if (flag)
                         {
-                            text2 = text2.Insert(text2.Length - 2, "과 ");
+                            text2 = text2 + ", 봄";
                         }
-                        text2 = text2.Insert(text2.Length - 2, "봄");
-
+                        else
+                            text2 = "봄";
                     }
+                    text2 += "에";
                 }
                 if (_this.allItems[itemId].placeable.tileObjectGrowthStages.needsTilledSoil)
                 {
-                    text = text + "이것들은 " + text2 + " 자랍니다.";
+                    text = text + "이 작물은 " + text2 + " 자랍니다. ";
                 }
                 if (_this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length != 0)
                 {
@@ -727,9 +732,8 @@ namespace DinkumKorean
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length.ToString(),
                         "</b>(으)로 <b>",
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                        "</b>(이)가 나오므로 주변에 공간이 필요합니다. 이 작물은 최대 4번의 파생물을 가질수 있는 기회가 있습니다"
+                        "</b>(이)가 나오므로 주변에 공간이 필요합니다. 이 작물은 최대 4개의 가지를 가질수 있습니다"
                         });
-                        text = KoreanCheck.ReplaceJosa(text);
                     }
                     else
                     {
@@ -741,9 +745,8 @@ namespace DinkumKorean
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
                         "개의 ",
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                        "(을)를 생산합니다"
+                        "(을)를 생산합니다. "
                         });
-                        text = KoreanCheck.ReplaceJosa(text);
                     }
                 }
                 if (!_this.allItems[itemId].placeable.tileObjectGrowthStages.diesOnHarvest && !_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
@@ -751,6 +754,7 @@ namespace DinkumKorean
                     text = string.Concat(new string[]
                     {
                     text,
+                    "계속해서 ",
                     Mathf.Abs(_this.allItems[itemId].placeable.tileObjectGrowthStages.takeOrAddFromStateOnHarvest).ToString(),
                     "일마다 ",
                     _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
@@ -758,7 +762,6 @@ namespace DinkumKorean
                     _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
                     "(을)를 수확할 수 있습니다."
                     });
-                    text = KoreanCheck.ReplaceJosa(text);
                 }
                 if (!WorldManager.manageWorld.allObjectSettings[_this.allItems[itemId].placeable.tileObjectId].walkable)
                 {

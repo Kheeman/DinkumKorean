@@ -16,7 +16,7 @@ using I2LocPatch;
 
 namespace DinkumKorean
 {
-    [BepInPlugin("Kheeman.Dinkum.DinkumKorean", "DinkumKorean", "1.0.0")]
+    [BepInPlugin("Kheeman.Dinkum.DinkumKorean", "DinkumKorean", "1.0.1")]
     public class DinkumKoreanPlugin : BaseUnityPlugin
     {
         public static DinkumKoreanPlugin Inst;
@@ -56,6 +56,7 @@ namespace DinkumKorean
             Inst = this;
             DevMode = Config.Bind<bool>("Dev", "DevMode", false, "개발 모드에서 단축키를 눌러 개발 모드를 트리거할 수 있습니다.");
             DontLoadLocOnDevMode = Config.Bind<bool>("Dev", "DontLoadLocOnDevMode", true, "개발 모드에서는 DynamicText Post Quest 번역이 로드되지 않아 덤핑에 편리합니다.");
+            LogNoTranslation = Config.Bind<bool>("Tool", "LogNoTranslation", true, "번역되지 않은 대상을 출력할 수 있습니다.");
             DebugWindow = new UIWindow("언어 테스트 도구 [Ctrl+Numpad 4]");
             DebugWindow.OnWinodwGUI = DebugWindowGUI;
             ErrorWindow = new UIWindow("언어 오류");
@@ -343,7 +344,7 @@ namespace DinkumKorean
             {
                 if (!__result)
                 {
-                    Debug.LogWarning($"LocalizationManager获取翻译失败:Term:{Term}");
+                    Debug.LogWarning($"LocalizationManager 번역을 가져오지 못했습니다:Term:{Term}");
                 }
             }
         }
@@ -586,7 +587,7 @@ namespace DinkumKorean
                 }
             }
             i2File.WriteCSVTable($"{Paths.GameRootPath}/I2/{i2File.Name}.csv");
-            LogInfo($"Dump {i2File.Name}完毕");
+            LogInfo($"Dump {i2File.Name} 완료");
         }
 
         public void DumpAllPost()

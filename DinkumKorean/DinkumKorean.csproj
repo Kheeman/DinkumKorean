@@ -49,7 +49,7 @@
     </Reference>
     <Reference Include="I2LocPatch, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files (x86)\Steam\steamapps\common\Dinkum\BepInEx\plugins\I2LocPatch.dll</HintPath>
+      <HintPath>D:\Games\SteamLibrary\steamapps\common\Dinkum\BepInEx\plugins\I2LocPatch.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mirror">
@@ -86,7 +86,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>..\..\..\Program Files (x86)\Steam\steamapps\common\Dinkum\Dinkum_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>D:\Games\SteamLibrary\steamapps\common\Dinkum\Dinkum_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
@@ -124,7 +124,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DinkumKorean.cs" />
-    <Compile Include="DinkumChinese.cs" />
     <Compile Include="FileHelper.cs" />
     <Compile Include="ILPatch.cs" />
     <Compile Include="KoreanCheck.cs" />
