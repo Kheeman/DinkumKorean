@@ -559,8 +559,23 @@ namespace DinkumKorean
                 __instance.missionText = missionText;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt")]
+        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] {typeof(string), typeof(Sprite)})]
         public static void PickUpNotification_fillButtonPrompt_Patch(PickUpNotification __instance, string buttonPromptText)
+        {
+            string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText.Trim());
+            if (text.Contains("구입"))
+            {
+                text = text.Replace("구입", "") + " 구입";
+            }
+            if (text.Contains("대화하기"))
+            {
+                text = text.Replace("대화하기", "") + " 대화하기";
+            }
+            __instance.itemText.text = text.Trim();
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] { typeof(string), typeof(Input_Rebind.RebindType) })]
+        public static void PickUpNotification_fillButtonPrompt_Patch2(PickUpNotification __instance, string buttonPromptText)
         {
             string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText.Trim());
             if (text.Contains("구입"))
