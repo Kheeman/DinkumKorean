@@ -99,6 +99,7 @@ namespace DinkumKorean
 
         public void ErrorWindowFunc()
         {
+            GUILayout.Label("请注意检查是否有新版本汉化");
             GUILayout.Label(ErrorStr);
         }
 
@@ -375,7 +376,7 @@ namespace DinkumKorean
                 MatchCollection mc2 = reg.Matches(term.Languages[3]);
                 if (mc1.Count != mc2.Count)
                 {
-                    string log = $"줄번호:{i + hangOffset} Key:{term.Term} 괄호 수가 일치하지 않습니다. 원문에는 {mc1.Count}의 괄호가 있습니다. 번역에는 {mc2.Count}의 괄호가 있습니다.";
+                    string log = $"行号:{i + hangOffset} Key:{term.Term} 中的括号数量不一致 英文原文有{mc1.Count}对括号 中文中有{mc2.Count}对括号";
                     LogInfo(log);
                     sb.AppendLine(log);
                     findCount++;
