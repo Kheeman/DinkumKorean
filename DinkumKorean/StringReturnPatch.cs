@@ -9,237 +9,801 @@ using HarmonyLib;
 using I2.Loc;
 using UnityEngine;
 using I2LocPatch;
+using Mirror;
 
 namespace DinkumKorean
 {
     public static class StringReturnPatch
     {
-        [HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameUnderMapCursor")]
-        public static void GenerateMap_getBiomeNameUnderMapCursor_Patch(ref string __result)
+        #region Prefix
+        [HarmonyPrefix, HarmonyPatch(typeof(AnimalManager), "capitaliseFirstLetter")]
+        public static bool AnimalManager_capitaliseFirstLetter_Patch(ref string __result, string toChange)
         {
-            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result.StrToI2Str());
+            try
+            {
+                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, toChange);
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return true;
+            }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameById")]
-        public static void GenerateMap_getBiomeNameById_Patch(ref string __result, int id)
+        [HarmonyPrefix, HarmonyPatch(typeof(BullitenBoardPost), "getRequirementsNeededInPhoto")]
+        public static bool BullitenBoardPost_getRequirementsNeededInPhoto_Patch(BullitenBoardPost __instance, int postId, ref string __result)
         {
-            GenerateMap.biomNames biomNames = (GenerateMap.biomNames)id;
-            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, biomNames.ToString());
+            try
+            {
+                if (!BulletinBoard.board.attachedPosts[postId].isPhotoTask)
+                {
+                    __result = "";
+                    return false;
+                }
+                List<string> list = new List<string>();
+                List<int> list2 = new List<int>();
+                string text = "";
+                if (BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.getSubjectType() == PhotoChallengeManager.photoSubject.Animal)
+                {
+                    for (int i = 0; i < BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.animalsRequiredInPhoto().Length; i++)
+                    {
+                        string item = BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.animalsRequiredInPhoto()[i].animalName;
+                        if (BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.animalsRequiredInPhoto()[i].animalId == 1)
+                        {
+                            item = AnimalManager.manage.allAnimals[1].GetComponent<FishType>().getFishInvItem().getInvItemName();
+                        }
+                        else if (BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.animalsRequiredInPhoto()[i].animalId == 2)
+                        {
+                            item = BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.animalsRequiredInPhoto()[i].GetComponent<BugTypes>().bugInvItem().itemName;
+                        }
+                        if (!list.Contains(item))
+                        {
+                            list.Add(item);
+                            list2.Add(1);
+                        }
+                        else
+                        {
+                            list2[list.IndexOf(item)]++;
+                        }
+                    }
+                    for (int j = 0; j < list.Count; j++)
+                    {
+                        text = ((list2[j] <= 1) ? (text + "" + list[j]) : (text + list2[j] + "" + list[j]));
+                        if (j != list.Count - 1)
+                        {
+                            text = ((j != list.Count - 2 || list.Count <= 1) ? (text + "，") : (text + "그리고"));
+                        }
+                    }
+                }
+                else
+                {
+                    if (BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.getSubjectType() == PhotoChallengeManager.photoSubject.Npc)
+                    {
+                        __result = NPCManager.manage.NPCDetails[BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.returnSubjectId()[0]].NPCName;
+                        return false;
+                    }
+                    if (BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.getSubjectType() == PhotoChallengeManager.photoSubject.Location)
+                    {
+                        __result = "지도의 마커에서 사진 찍기.";
+                        return false;
+                    }
+                    if (BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.getSubjectType() == PhotoChallengeManager.photoSubject.Carryable)
+                    {
+                        string itemName;
+                        if ((bool)SaveLoad.saveOrLoad.carryablePrefabs[BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.returnSubjectId()[0]].GetComponent<SellByWeight>())
+                        {
+                            itemName = SaveLoad.saveOrLoad.carryablePrefabs[BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.returnSubjectId()[0]].GetComponent<SellByWeight>().itemName;
+                        }
+                        else
+                        {
+                            itemName = SaveLoad.saveOrLoad.carryablePrefabs[BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.returnSubjectId()[0]].name;
+                        }
+                        __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, itemName);
+                        return false;
+                    }
+                    if (BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.getSubjectType() == PhotoChallengeManager.photoSubject.Biome)
+                    {
+                        __result = BulletinBoard.board.attachedPosts[postId].myPhotoChallenge.returnRequiredLocationBiomeName() + "에서 사진 촬영";
+                        return false;
+                    }
+                }
+                __result = text;
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return true;
+            }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PostOnBoard), "getTitleText")]
-        public static void PostOnBoard_getTitleText_Patch(PostOnBoard __instance, ref string __result, int postId)
+        [HarmonyPrefix, HarmonyPatch(typeof(Inventory), "getExtraDetails")]
+        public static bool Inventory_getExtraDetails_Patch(Inventory __instance, int itemId, ref string __result)
         {
-            string titleOri = __instance.getPostPostsById().title.StrToI2Str();
-            string title = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.PostTextLocList, titleOri);
-            __result = title.Replace("<boardRewardItem>",
-                __instance.getPostPostsById().getBoardRewardItem(postId)).Replace("<boardHuntRequestAnimal>",
-                __instance.getPostPostsById().getBoardHuntRequestAnimal(postId)).Replace("<boardRequestItem>",
-                __instance.getPostPostsById().getBoardRequestItem(postId));
+            var _this = __instance;
+            string text = "";
+            if (_this.allItems[itemId].placeable && _this.allItems[itemId].placeable.tileObjectGrowthStages && !_this.allItems[itemId].consumeable)
+            {
+                string text2 = "";
+                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
+                {
+                    text2 = "모든 계절";
+                }
+                else
+                {
+                    bool flag = false;
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer)
+                    {
+                        text2 = "여름";
+                        flag = true;
+                    }
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
+                    {
+                        if (flag)
+                        {
+                            text2 = text2 + ", 가을";
+                        }
+                        else
+                            text2 = "가을";
+
+                    }
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter)
+                    {
+                        if (flag)
+                        {
+                            text2 = text2 + ", 겨울";
+                        }
+                        else
+                            text2 = "겨울";
+
+                    }
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring)
+                    {
+                        if (flag)
+                        {
+                            text2 = text2 + ", 봄";
+                        }
+                        else
+                            text2 = "봄";
+                    }
+                    text2 += "에";
+                }
+                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.needsTilledSoil)
+                {
+                    text = text + "이 작물은 " + text2 + " 자랍니다. ";
+                }
+                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length != 0)
+                {
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
+                    {
+                        text = string.Concat(new string[]
+                        {
+                        text,
+                        "<b>",
+                        _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length.ToString(),
+                        "</b>(으)로 <b>",
+                        _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestDrop.getInvItemName(),
+                        "</b>(이)가 나오므로 주변에 공간이 필요합니다. 이 작물은 최대 4개의 가지를 가질수 있습니다"
+                        });
+                    }
+                    else
+                    {
+                        text = string.Concat(new string[]
+                        {
+                        text,
+                        _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString(),
+                        "일 동안 자랍니다. ",
+                        _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
+                        "개의 ",
+                        _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
+                        "(을)를 생산합니다. "
+                        });
+                    }
+                }
+                if (!_this.allItems[itemId].placeable.tileObjectGrowthStages.diesOnHarvest && !_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
+                {
+                    text = string.Concat(new string[]
+                    {
+                    text,
+                    "계속해서 ",
+                    Mathf.Abs(_this.allItems[itemId].placeable.tileObjectGrowthStages.takeOrAddFromStateOnHarvest).ToString(),
+                    "일마다 ",
+                    _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
+                    "개의 ",
+                    _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
+                    "(을)를 수확할 수 있습니다."
+                    });
+                }
+                if (!WorldManager.manageWorld.allObjectSettings[_this.allItems[itemId].placeable.tileObjectId].walkable)
+                {
+                    text += " 아, 여기에 붙어서 자라기 위한 식물 받침대도 필요합니다.";
+                }
+            }
+            __result = KoreanCheck.ReplaceJosa(text);
+            return false;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PostOnBoard), "getContentText")]
-        public static void PostOnBoard_getContentText_Patch(PostOnBoard __instance, ref string __result, int postId)
+        [HarmonyPrefix, HarmonyPatch(typeof(NetworkMapSharer), "UserCode_RpcDeliverAnimal")]
+        public static bool NetworkMapSharer_UserCode_RpcDeliverAnimal_Patch(uint deliveredBy, int animalDelivered, int variationDelivered, int rewardToSend, int trapType)
         {
-            string textOri = __instance.getPostPostsById().contentText.StrToI2Str();
-            string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.PostTextLocList, textOri);
-            __result = text.Replace("<boardRewardItem>",
-                __instance.getPostPostsById().getBoardRewardItem(postId)).Replace("<boardHuntRequestAnimal>",
-                __instance.getPostPostsById().getBoardHuntRequestAnimal(postId)).Replace("<getAnimalsInPhotoList>",
-                __instance.getPostPostsById().getRequirementsNeededInPhoto(postId)).Replace("<boardRequestItem>",
-                __instance.getPostPostsById().getBoardRequestItem(postId));
+            try
+            {
+                if (NetworkIdentity.spawned.ContainsKey(deliveredBy))
+                {
+                    CharMovement component = NetworkIdentity.spawned[deliveredBy].GetComponent<CharMovement>();
+                    var animal = AnimalManager.manage.allAnimals[animalDelivered];
+                    // 동물 이름 가져오기
+                    string animalName = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.AnimalsTextLocList, animal.animalName);
+                    string str = animalName;
+                    if (variationDelivered != 0)
+                    {
+                        string variationName = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, animal.hasVariation.variationAdjective[variationDelivered]);
+                        str = variationName + animalName;
+                    }
+
+                    string ret = KoreanCheck.ReplaceJosa(component.GetComponent<EquipItemToChar>().playerName + "(은)는 " + str + "(을)를 배달했습니다.");
+                    NotificationManager.manage.createChatNotification(ret, false);
+                    if (component.isLocalPlayer)
+                    {
+                        if (animalDelivered == 29)
+                        {
+                            MailManager.manage.sendAChrissyAnimalCapturedLetter(trapType);
+                            return false;
+                        }
+                        MailManager.manage.sendAnAnimalCapturedLetter(rewardToSend, trapType);
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return true;
+            }
         }
-        
-        //ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(ConversationManager), "checkLineForReplacement")]
-        public static void ConversationManager_checkLineForReplacement(ConversationManager __instance, ref string __result)
+
+        [HarmonyPrefix, HarmonyPatch(typeof(SeasonAndTime), "capitaliseFirstLetter")]
+        public static bool SeasonAndTime_capitaliseFirstLetter_Patch(ref string __result, string toChange)
         {
-            __result = KoreanCheck.ReplaceJosa(__result);
+            try
+            {
+                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, toChange);
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return true;
+            }
+        }
+        #endregion Prefix
+
+        #region Postfix
+
+        [HarmonyPostfix, HarmonyPatch(typeof(AnimalHouseMenu), "fillData")]
+        public static void AnimalHouseMenu_fillData_Patch(AnimalHouseMenu __instance)
+        {
+            try
+            {
+                __instance.eatenText.text = __instance.eatenText.text.Replace("Eaten", "먹이주기");
+                __instance.shelterText.text = __instance.shelterText.text.Replace("Shelter", "쉼터");
+                __instance.pettedText.text = __instance.pettedText.text.Replace("Petted", "쓰다듬기");
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(AnimalHouseMenu), "openConfirm")]
         public static void AnimalHouseMenu_openConfirm_Patch(AnimalHouseMenu __instance, ref FarmAnimalDetails ___showingAnimal)
         {
-            string text = ___showingAnimal.animalName + "(을)를 <sprite=11>" + __instance.getSellValue().ToString("n0") + "에 판매할까요?";
-            text = KoreanCheck.ReplaceJosa(text);
-            __instance.confirmText.text = text;
+            try
+            {
+                string text = ___showingAnimal.animalName + "(을)를 <sprite=11>" + __instance.getSellValue().ToString("n0") + "에 판매할까요?";
+                text = KoreanCheck.ReplaceJosa(text);
+                __instance.confirmText.text = text;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(AnimalManager), "fillAnimalLocation")]
+        public static void AnimalManager_fillAnimalLocation_Patch(ref string __result)
+        {
+            try
+            {
+                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        //ADD
+        [HarmonyPostfix, HarmonyPatch(typeof(BugAndFishCelebration), "openWindow")]
+        public static void BugAndFishCelebration_openWindow_Patch(BugAndFishCelebration __instance, int invItem)
+        {
+            try
+            {
+                string text = Inventory.inv.allItems[invItem].getInvItemName() + "(을)를 잡았다!";
+                text = KoreanCheck.ReplaceJosa(text);
+                __instance.celebrationText.text = text;
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        //ADD
+        [HarmonyPostfix, HarmonyPatch(typeof(BulletinBoard), "getMissionText")]
+        public static void BulletinBoard_getMissionText_Patch(BulletinBoard __instance, int missionNo, ref string __result)
+        {
+            try
+            {
+                var attachedPosts = __instance.attachedPosts;
+                BullitenBoardPost postPostsById = attachedPosts[missionNo].getPostPostsById();
+                string text = "";
+                if (attachedPosts[missionNo].isTrade)
+                {
+                    text = attachedPosts[missionNo].getPostPostsById().getBoardRequestItem(missionNo) + "(와)과 " + attachedPosts[missionNo].getPostedByName() + "교환하기";
+                }
+
+                if (attachedPosts[missionNo].isHuntingTask)
+                {
+                    text = "<sprite=12> 지도에서 마지막으로 알려진 위치를 이용해서 " + postPostsById.getBoardHuntRequestAnimal(missionNo) + "(을)를 사냥하세요";
+
+                    if (attachedPosts[missionNo].readyForNPC)
+                    {
+                        text = "<sprite=12> " + attachedPosts[missionNo].getPostedByName() + "(와)과 대화하기";
+                    }
+                }
+
+                if (attachedPosts[missionNo].isInvestigation)
+                {
+                    text = "<sprite=13> 지도의 위치를 방문하여 조사하세요";
+                }
+
+                __result = KoreanCheck.ReplaceJosa(text);
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(CustomNetworkManager), "refreshLobbyTypeButtons")]
+        public static void CustomNetworkManager_refreshLobbyTypeButtons_Patch(CustomNetworkManager __instance)
+        {
+            try
+            {
+                __instance.friendGameText.text = __instance.friendGameText.text.Replace("Friends Only", "친구만");
+                __instance.inviteOnlyText.text = __instance.inviteOnlyText.text.Replace("InviteOnly", "초대만");
+                __instance.publicGameText.text = __instance.publicGameText.text.Replace("Public", "공개");
+                __instance.lanGameText.text = __instance.lanGameText.text.Replace("LAN", "LAN");
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameUnderMapCursor")]
+        public static void GenerateMap_getBiomeNameUnderMapCursor_Patch(ref string __result)
+        {
+            try
+            {
+                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result.StrToI2Str());
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameById")]
+        public static void GenerateMap_getBiomeNameById_Patch(ref string __result, int id)
+        {
+            try
+            {
+                GenerateMap.biomNames biomNames = (GenerateMap.biomNames)id;
+                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, biomNames.ToString());
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        //ADD
+        [HarmonyPostfix, HarmonyPatch(typeof(InventoryItemDescription), "fillItemDescription")]
+        public static void InventoryItemDescription_fillItemDescription_Patch(InventoryItemDescription __instance, InventoryItem item)
+        {
+            try
+            {
+                if (((bool)item.placeable && (bool)item.placeable.sprinklerTile) || ((bool)item.placeable && item.placeable.tileObjectId == 16))
+                {
+                    __instance.reachTiles.SetActive(value: true);
+                    if (item.placeable.tileObjectId == 16)
+                    {
+                        __instance.reachTileText.text = "최대 12개의 타일에 대해 특정 생산 장치의 속도를 높입니다";
+                    }
+                    else if (!item.placeable.sprinklerTile.isTank && !item.placeable.sprinklerTile.isSilo)
+                    {
+                        __instance.reachTileText.text = item.placeable.sprinklerTile.verticlSize + "개의 타일에 도달합니다.\n<color=red>물탱크가 필요합니다</color>";
+                    }
+                    else if (item.placeable.sprinklerTile.isTank)
+                    {
+                        __instance.reachTileText.text = "스프링클러에 물을 " + item.placeable.sprinklerTile.verticlSize + "타일 밖으로 제공합니다.";
+                    }
+                    else if (item.placeable.sprinklerTile.isSilo)
+                    {
+                        __instance.reachTileText.text = "동물 사료통을 " + item.placeable.sprinklerTile.verticlSize + "타일 밖으로 채웁니다.\n<color=red>동물사료가 필요합니다</color>";
+                    }
+                }
+
+                if ((bool)item.placeable && (bool)item.placeable.tileObjectBridge)
+                {
+                    __instance.bridgeWidthText.text = item.placeable.getXSize() + " x 타일 너비";
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(Licence), "getConnectedSkillName")]
+        public static void Licence_getConnectedSkillName_Patch(ref string __result)
+        {
+            try
+            {
+                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        // ADD
+        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "getDesiredItemNameByNumber")]
+        public static void NPCRequest_getDesiredItemNameByNumber_Patch(int invId, int amount, ref string __result)
+        {
+            try
+            {
+                __result = Inventory.inv.allItems[invId].getInvItemName() + " " + amount + "개";
+
+                if (amount == 1)
+                {
+                    __result = Inventory.inv.allItems[invId].getInvItemName();
+                }
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        // ADD
+        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "getMissionText")]
+        public static void NPCRequest_getMissionText_Patch(NPCRequest __instance, int npcId, ref string __result)
+        {
+            try
+            {
+                __result = "<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
+
+                if (__instance.specificDesiredItem != -1)
+                {
+                    string text = " [" + __instance.checkAmountOfItemsInInv() + "/" + __instance.desiredAmount + "]";
+
+                    __result = "<sprite=12> " + __instance.getDesiredItemName() + " 수집하기" + text + "\n<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
+
+                    if (__instance.checkAmountOfItemsInInv() >= __instance.desiredAmount)
+                    {
+                        __result = "<sprite=13> " + __instance.getDesiredItemName() + " 수집하기" + text + "\n<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
+                    }
+                }
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomBugNoAndLocation")]
+        public static void NPCRequest_setRandomBugNoAndLocation_Patch(NPCRequest __instance)
+        {
+            try
+            {
+                __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomFishNoAndLocation")]
+        public static void NPCRequest_setRandomFishNoAndLocation_Patch(NPCRequest __instance)
+        {
+            try
+            {
+                __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] { typeof(string), typeof(Sprite) })]
+        public static void PickUpNotification_fillButtonPrompt_Patch(PickUpNotification __instance, string buttonPromptText)
+        {
+            try
+            {
+                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText);
+                __instance.itemText.text = text;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] { typeof(string), typeof(Input_Rebind.RebindType) })]
+        public static void PickUpNotification_fillButtonPrompt_Patch2(PickUpNotification __instance, string buttonPromptText)
+        {
+            try
+            {
+                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText);
+                __instance.itemText.text = text;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PostOnBoard), "getTitleText")]
+        public static void PostOnBoard_getTitleText_Patch(PostOnBoard __instance, ref string __result, int postId)
+        {
+            try
+            {
+                string titleOri = __instance.getPostPostsById().title.StrToI2Str();
+                string title = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.PostTextLocList, titleOri);
+                __result = title.Replace("<boardRewardItem>",
+                    __instance.getPostPostsById().getBoardRewardItem(postId)).Replace("<boardHuntRequestAnimal>",
+                    __instance.getPostPostsById().getBoardHuntRequestAnimal(postId)).Replace("<boardRequestItem>",
+                    __instance.getPostPostsById().getBoardRequestItem(postId));
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PostOnBoard), "getContentText")]
+        public static void PostOnBoard_getContentText_Patch(PostOnBoard __instance, ref string __result, int postId)
+        {
+            try
+            {
+                string textOri = __instance.getPostPostsById().contentText.StrToI2Str();
+                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.PostTextLocList, textOri);
+                __result = text.Replace("<boardRewardItem>",
+                    __instance.getPostPostsById().getBoardRewardItem(postId)).Replace("<boardHuntRequestAnimal>",
+                    __instance.getPostPostsById().getBoardHuntRequestAnimal(postId)).Replace("<getAnimalsInPhotoList>",
+                    __instance.getPostPostsById().getRequirementsNeededInPhoto(postId)).Replace("<boardRequestItem>",
+                    __instance.getPostPostsById().getBoardRequestItem(postId));
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        //ADD
+        [HarmonyPostfix, HarmonyPatch(typeof(ConversationManager), "checkLineForReplacement")]
+        public static void ConversationManager_checkLineForReplacement(ConversationManager __instance, ref string __result)
+        {
+            try
+            {
+                __result = KoreanCheck.ReplaceJosa(__result);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         //ADD
         [HarmonyPostfix, HarmonyPatch(typeof(Quest), "getMissionObjText")]
         public static void Quest_getMissionObjText_Patch(Quest __instance, ref string __result)
         {
-            string ret = "";
-
-            if (__instance.attractResidentsQuest)
+            try
             {
-                ret = "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+                string ret = "";
 
-                if (NPCManager.manage.getNoOfNPCsMovedIn() < 5)
-                    ret = "<sprite=12> " + Inventory.inv.islandName + "(으)로 이주할 영주권자 총 5명을 유치하세요 [ " + NPCManager.manage.getNoOfNPCsMovedIn() + "/5]";
-
-                if (BuildingManager.manage.currentlyMoving == __instance.requiredBuilding[0].tileObjectId)
-                    ret = "<sprite=12> 베이스 텐트가 이동되면 " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하세요";
-            }
-
-            if (__instance.questToUseChanger)
-            {
-                ret = "<sprite=12> 베이스 텐트의 제작대에서 " + __instance.placeableToPlace.getInvItemName() + "(을)를 제작하세요.\n<sprite=12> " + __instance.placeableToPlace.getInvItemName() + "(을)를 바깥쪽에 배치하세요.\n<sprite=12> 주석광석을 " + __instance.placeableToPlace.getInvItemName() + "에 넣고 " + __instance.requiredItems[0].getInvItemName() + "(이)가 될 때까지 기다립니다.\n<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 " + __instance.requiredItems[0].getInvItemName() + "(을)를 가져갑니다.";
-
-                if (__instance.checkIfHasAllRequiredItems())
-                    ret = "<sprite=13> 베이스 텐트의 제작대에서 " + __instance.placeableToPlace.getInvItemName() + "(을)를 제작하세요.\n<sprite=13> " + __instance.placeableToPlace.getInvItemName() + "(을)를 바깥쪽에 배치하세요.\n<sprite=13> 주석광석을 " + __instance.placeableToPlace.getInvItemName() + "에 넣고 " + __instance.requiredItems[0].getInvItemName() + "(이)가 될 때까지 기다립니다.\n<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 " + __instance.requiredItems[0].getInvItemName() + "(을)를 가져갑니다.";
-
-                if (__instance.checkIfHasBeenPlaced())
-                    ret = "<sprite=13> 베이스 텐트의 제작대에서 " + __instance.placeableToPlace.getInvItemName() + "(을)를 제작하세요.\n<sprite=13> " + __instance.placeableToPlace.getInvItemName() + "(을)를 바깥쪽에 배치하세요.\n<sprite=12> 주석광석을 " + __instance.placeableToPlace.getInvItemName() + "에 넣고 " + __instance.requiredItems[0].getInvItemName() + "(이)가 될 때까지 기다립니다.\n<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 " + __instance.requiredItems[0].getInvItemName() + "(을)를 가져갑니다.";
-
-                if (Inventory.inv.getAmountOfItemInAllSlots(Inventory.inv.getInvItemId(__instance.placeableToPlace)) >= 1)
-                    ret = "<sprite=13> 베이스 텐트의 제작대에서 " + __instance.placeableToPlace.getInvItemName() + "(을)를 제작하세요.\n<sprite=12> " + __instance.placeableToPlace.getInvItemName() + "(을)를 바깥쪽에 배치하세요.\n<sprite=12> 주석광석을 " + __instance.placeableToPlace.getInvItemName() + "에 넣고 " + __instance.requiredItems[0].getInvItemName() + "(이)가 될 때까지 기다립니다.\n<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 " + __instance.requiredItems[0].getInvItemName() + "(을)를 가져갑니다.";
-            }
-
-            if (__instance.placeOrHaveItem)
-            {
-                ret = "<sprite=12> " + __instance.requiredItems[0].getInvItemName() + "(을)를 구입하세요.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
-
-                if (__instance.checkIfHasInInvOrHasBeenPlaced())
-                    ret = "<sprite=13> " + __instance.requiredItems[0].getInvItemName() + "(을)를 구입하세요.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
-            }
-
-            if (__instance.autoCompletesOnDate)
-            {
-                ret = "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
-
-                if (!__instance.isPastDate())
-                    ret = "[선택 사항] 오늘의 할일 완료하기\n<sprite=12>침낭을 놓고 휴식을 취하세요.";
-            }
-
-            if (__instance.questForFood)
-            {
-                ret = "<sprite=12> 먹을거리 찾기.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
-
-                if (__instance.checkIfFoodInInv())
-                    ret = "<sprite=13> 먹을거리 찾기.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
-            }
-
-            if (__instance.requiredItems.Length != 0)
-            {
-                string text = "\t";
-                for (int i = 0; i < __instance.requiredItems.Length; i++)
+                if (__instance.attractResidentsQuest)
                 {
-                    text = text + "\n[" + Inventory.inv.getAmountOfItemInAllSlots(Inventory.inv.getInvItemId(__instance.requiredItems[i])) + "/" + __instance.requiredStacks[i] + "] " + __instance.requiredItems[i].getInvItemName();
+                    ret = "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+
+                    if (NPCManager.manage.getNoOfNPCsMovedIn() < 5)
+                        ret = "<sprite=12> " + Inventory.inv.islandName + "(으)로 이주할 영주권자 총 5명을 유치하세요 [ " + NPCManager.manage.getNoOfNPCsMovedIn() + "/5]";
+
+                    if (BuildingManager.manage.currentlyMoving == __instance.requiredBuilding[0].tileObjectId)
+                        ret = "<sprite=12> 베이스 텐트가 이동되면 " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하세요";
                 }
 
-                ret = "<sprite=12> 요청한 아이템을 수집하세요." + text + "\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 가져갑니다";
-
-                if (__instance.checkIfHasAllRequiredItems())
+                if (__instance.questToUseChanger)
                 {
-                    ret = "<sprite=13> 요청한 아이템을 수집하세요.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 가져갑니다";
-                }
-            }
+                    ret = "<sprite=12> 베이스 텐트의 제작대에서 " + __instance.placeableToPlace.getInvItemName() + "(을)를 제작하세요.\n<sprite=12> " + __instance.placeableToPlace.getInvItemName() + "(을)를 바깥쪽에 배치하세요.\n<sprite=12> 주석광석을 " + __instance.placeableToPlace.getInvItemName() + "에 넣고 " + __instance.requiredItems[0].getInvItemName() + "(이)가 될 때까지 기다립니다.\n<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 " + __instance.requiredItems[0].getInvItemName() + "(을)를 가져갑니다.";
 
-            if ((bool)__instance.deedToApplyFor)
+                    if (__instance.checkIfHasAllRequiredItems())
+                        ret = "<sprite=13> 베이스 텐트의 제작대에서 " + __instance.placeableToPlace.getInvItemName() + "(을)를 제작하세요.\n<sprite=13> " + __instance.placeableToPlace.getInvItemName() + "(을)를 바깥쪽에 배치하세요.\n<sprite=13> 주석광석을 " + __instance.placeableToPlace.getInvItemName() + "에 넣고 " + __instance.requiredItems[0].getInvItemName() + "(이)가 될 때까지 기다립니다.\n<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 " + __instance.requiredItems[0].getInvItemName() + "(을)를 가져갑니다.";
+
+                    if (__instance.checkIfHasBeenPlaced())
+                        ret = "<sprite=13> 베이스 텐트의 제작대에서 " + __instance.placeableToPlace.getInvItemName() + "(을)를 제작하세요.\n<sprite=13> " + __instance.placeableToPlace.getInvItemName() + "(을)를 바깥쪽에 배치하세요.\n<sprite=12> 주석광석을 " + __instance.placeableToPlace.getInvItemName() + "에 넣고 " + __instance.requiredItems[0].getInvItemName() + "(이)가 될 때까지 기다립니다.\n<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 " + __instance.requiredItems[0].getInvItemName() + "(을)를 가져갑니다.";
+
+                    if (Inventory.inv.getAmountOfItemInAllSlots(Inventory.inv.getInvItemId(__instance.placeableToPlace)) >= 1)
+                        ret = "<sprite=13> 베이스 텐트의 제작대에서 " + __instance.placeableToPlace.getInvItemName() + "(을)를 제작하세요.\n<sprite=12> " + __instance.placeableToPlace.getInvItemName() + "(을)를 바깥쪽에 배치하세요.\n<sprite=12> 주석광석을 " + __instance.placeableToPlace.getInvItemName() + "에 넣고 " + __instance.requiredItems[0].getInvItemName() + "(이)가 될 때까지 기다립니다.\n<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 " + __instance.requiredItems[0].getInvItemName() + "(을)를 가져갑니다.";
+                }
+
+                if (__instance.placeOrHaveItem)
+                {
+                    ret = "<sprite=12> " + __instance.requiredItems[0].getInvItemName() + "(을)를 구입하세요.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+
+                    if (__instance.checkIfHasInInvOrHasBeenPlaced())
+                        ret = "<sprite=13> " + __instance.requiredItems[0].getInvItemName() + "(을)를 구입하세요.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+                }
+
+                if (__instance.autoCompletesOnDate)
+                {
+                    ret = "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+
+                    if (!__instance.isPastDate())
+                        ret = "[선택 사항] 오늘의 할일 완료하기\n<sprite=12>침낭을 놓고 휴식을 취하세요.";
+                }
+
+                if (__instance.questForFood)
+                {
+                    ret = "<sprite=12> 먹을거리 찾기.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+
+                    if (__instance.checkIfFoodInInv())
+                        ret = "<sprite=13> 먹을거리 찾기.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+                }
+
+                if (__instance.requiredItems.Length != 0)
+                {
+                    string text = "\t";
+                    for (int i = 0; i < __instance.requiredItems.Length; i++)
+                    {
+                        text = text + "\n[" + Inventory.inv.getAmountOfItemInAllSlots(Inventory.inv.getInvItemId(__instance.requiredItems[i])) + "/" + __instance.requiredStacks[i] + "] " + __instance.requiredItems[i].getInvItemName();
+                    }
+
+                    ret = "<sprite=12> 요청한 아이템을 수집하세요." + text + "\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 가져갑니다";
+
+                    if (__instance.checkIfHasAllRequiredItems())
+                    {
+                        ret = "<sprite=13> 요청한 아이템을 수집하세요.\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 가져갑니다";
+                    }
+                }
+
+                if ((bool)__instance.deedToApplyFor)
+                {
+                    ret = "<sprite=12> 계약 장소의 건설 상자에 필요한 아이템을 넣습니다.";
+
+                    if (__instance.npcToConvinceToMoveAIn != null)
+                    {
+                        for (int j = 0; j < NPCManager.manage.NPCDetails.Length; j++)
+                        {
+                            if (NPCManager.manage.NPCDetails[j] == __instance.npcToConvinceToMoveAIn && !NPCManager.manage.npcStatus[j].hasAskedToMoveIn)
+                            {
+                                string text2 = "";
+                                text2 = ((NPCManager.manage.npcStatus[j].relationshipLevel >= NPCManager.manage.NPCDetails[j].relationshipBeforeMove) ? (text2 + "<sprite=13> John의 부탁을 들어주세요.") : (text2 + "<sprite=12> John의 부탁을 들어주세요."));
+                                text2 = ((NPCManager.manage.npcStatus[j].moneySpentAtStore >= NPCManager.manage.NPCDetails[j].spendBeforeMoveIn) ? (text2 + "\n<sprite=13> John의 상점에서 돈을 쓰거나 아이템 판매하기") : (text2 + "\n<sprite=12> John의 상점에서 돈을 쓰거나 아이템 판매하기"));
+                                ret = text2 + "\n<sprite=12> 존에게 이사를 오도록 설득하세요.";
+                            }
+                        }
+                    }
+
+                    if (!DeedManager.manage.checkIfDeedHasBeenBought(__instance.deedToApplyFor))
+                    {
+                        ret = "<sprite=12> " + __instance.deedToApplyFor.getInvItemName() + "(을)를 신청할 마을에 대해 " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 물어보세요";
+                    }
+
+                    if (!__instance.checkIfHasBeenPlaced())
+                    {
+                        ret = "<sprite=12> " + __instance.deedToApplyFor.getInvItemName() + "(을)를 배치하세요";
+                    }
+
+                    if (DeedManager.manage.checkIfDeedMaterialsComplete(__instance.deedToApplyFor))
+                    {
+                        ret = "<sprite=12> " + __instance.deedToApplyFor.getInvItemName() + "의 건설이 완료될 때까지 기다리세요";
+                    }
+                }
+
+                if (__instance.requiredBuilding != null && __instance.placeableToPlace != null)
+                {
+                    ret = "<sprite=13> " + __instance.placeableToPlace.getInvItemName() + "(을)를 배치하세요\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+
+                    if (!__instance.checkIfHasBeenPlaced())
+                    {
+                        ret = "<sprite=12> " + __instance.placeableToPlace.getInvItemName() + "(을)를 배치하세요\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(ret))
+                    __result = KoreanCheck.ReplaceJosa(ret);
+                else
+                    __result = "";
+            }
+            catch (Exception e)
             {
-                ret = "<sprite=12> 계약 장소의 건설 상자에 필요한 아이템을 넣습니다.";
-
-                if (!DeedManager.manage.checkIfDeedHasBeenBought(__instance.deedToApplyFor))
-                {
-                    ret = "<sprite=12> " + __instance.deedToApplyFor.getInvItemName() + "(을)를 신청할 마을에 대해 " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "에게 물어보세요";
-                }
-
-                if (!__instance.checkIfHasBeenPlaced())
-                {
-                    ret = "<sprite=12> " + __instance.deedToApplyFor.getInvItemName() + "(을)를 배치하세요";
-                }
-
-                if (DeedManager.manage.checkIfDeedMaterialsComplete(__instance.deedToApplyFor))
-                {
-                    ret = "<sprite=12> " + __instance.deedToApplyFor.getInvItemName() + "의 건설이 완료될 때까지 기다리세요";
-                }
+                Debug.LogException(e);
             }
-
-            if (__instance.requiredBuilding != null && __instance.placeableToPlace != null)
-            {
-                ret = "<sprite=13> " + __instance.placeableToPlace.getInvItemName() + "(을)를 배치하세요\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
-
-                if (!__instance.checkIfHasBeenPlaced())
-                {
-                    ret = "<sprite=12> " + __instance.placeableToPlace.getInvItemName() + "(을)를 배치하세요\n" + "<sprite=12> " + NPCManager.manage.NPCDetails[__instance.offeredByNpc].NPCName + "(와)과 대화하기";
-                }
-            }
-
-            if (!string.IsNullOrEmpty(ret))
-                __result = KoreanCheck.ReplaceJosa(ret);
-            else
-                __result = "";
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(QuestButton), "setUp")]
         public static void QuestButton_setUp_Patch(QuestButton __instance, int questNo)
         {
-            if (__instance.isMainQuestButton)
+            try
             {
-                string nameOri = QuestManager.manage.allQuests[questNo].QuestName.StrToI2Str();
-                string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
-                __instance.buttonText.text = name;
+                if (__instance.isMainQuestButton)
+                {
+                    string nameOri = QuestManager.manage.allQuests[questNo].QuestName.StrToI2Str();
+                    string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
+                    __instance.buttonText.text = name;
+                }
+                else if (__instance.isQuestButton)
+                {
+                }
+                else
+                {
+                    __instance.buttonText.text = __instance.buttonText.text.Replace("Request for ", "") + "의 요청";
+                }
             }
-            else if (__instance.isQuestButton)
-            {
-            }
-            else
-            {
-                __instance.buttonText.text = __instance.buttonText.text.Replace("Request for ", "") + "의 요청";
-            }
+            catch (Exception e) { Debug.LogException(e); }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(QuestNotification), "showQuest")]
         public static void QuestNotification_showQuest_Patch(QuestNotification __instance)
         {
-            string nameOri = __instance.displayingQuest.QuestName.StrToI2Str();
-            string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
-            __instance.QuestText.text = name;
+            try
+            {
+                string nameOri = __instance.displayingQuest.QuestName.StrToI2Str();
+                string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
+                __instance.QuestText.text = name;
+            }
+            catch (Exception e) { Debug.LogException(e); }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(QuestTracker), "displayMainQuest")]
         public static void QuestTracker_displayMainQuest_Patch(QuestTracker __instance, int questNo)
         {
-            string nameOri = QuestManager.manage.allQuests[questNo].QuestName.StrToI2Str();
-            string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
-            string descOri = QuestManager.manage.allQuests[questNo].QuestDescription.StrToI2Str();
-            string desc = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, descOri).Replace("<IslandName>", Inventory.inv.islandName);
-            __instance.questTitle.text = name;
-            __instance.questDesc.text = KoreanCheck.ReplaceJosa(desc);
+            try
+            {
+                string nameOri = QuestManager.manage.allQuests[questNo].QuestName.StrToI2Str();
+                string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
+                string descOri = QuestManager.manage.allQuests[questNo].QuestDescription.StrToI2Str();
+                string desc = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, descOri).Replace("<IslandName>", Inventory.inv.islandName);
+                __instance.questTitle.text = name;
+                __instance.questDesc.text = KoreanCheck.ReplaceJosa(desc);
+            }
+            catch (Exception e) { Debug.LogException(e); }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(QuestTracker), "pinTheTask")]
         public static void QuestTracker_pinTheTask_Patch(QuestTracker __instance, QuestTracker.typeOfTask type, int id)
         {
-            if (type == QuestTracker.typeOfTask.Quest)
+            try
             {
-                if (!QuestManager.manage.isQuestCompleted[id])
+                if (type == QuestTracker.typeOfTask.Quest)
                 {
-                    string nameOri = QuestManager.manage.allQuests[id].QuestName.StrToI2Str();
-                    string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
-                    string pinText = __instance.pinMissionText.text.Replace(QuestManager.manage.allQuests[id].QuestName, name);
-                    __instance.pinMissionText.text = pinText;
+                    if (!QuestManager.manage.isQuestCompleted[id])
+                    {
+                        string nameOri = QuestManager.manage.allQuests[id].QuestName.StrToI2Str();
+                        string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
+                        string pinText = __instance.pinMissionText.text.Replace(QuestManager.manage.allQuests[id].QuestName, name);
+                        __instance.pinMissionText.text = pinText;
+                    }
                 }
             }
+            catch (Exception e) { Debug.LogException(e); }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(QuestTracker), "updatePinnedTask")]
         public static void QuestTracker_updatePinnedTask_Patch(QuestTracker __instance, ref QuestTracker.typeOfTask ___pinnedType, ref int ___pinnedId)
         {
-            if (___pinnedType == QuestTracker.typeOfTask.Quest)
+            try
             {
-                string nameOri = QuestManager.manage.allQuests[___pinnedId].QuestName;
-                string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
-                __instance.pinMissionText.text = name + "\n<size=11>" + QuestManager.manage.allQuests[___pinnedId].getMissionObjText();
-            }
-
-            if (___pinnedType == QuestTracker.typeOfTask.Request)
-            {
-                if (!NPCManager.manage.npcStatus[___pinnedId].completedRequest)
+                if (___pinnedType == QuestTracker.typeOfTask.Request)
                 {
-                    __instance.pinMissionText.text = NPCManager.manage.NPCDetails[___pinnedId].NPCName + "의 요청\n<size=11>" + NPCManager.manage.NPCRequests[___pinnedId].getMissionText(___pinnedId);
+                    if (!NPCManager.manage.npcStatus[___pinnedId].completedRequest)
+                    {
+                        __instance.pinMissionText.text = NPCManager.manage.NPCDetails[___pinnedId].NPCName + "의 요청\n<size=11>" + NPCManager.manage.NPCRequests[___pinnedId].getMissionText(___pinnedId);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
 
@@ -251,36 +815,6 @@ namespace DinkumKorean
             string text = KoreanCheck.ReplaceJosa(NPCManager.manage.NPCDetails[requestNo].NPCName + "(이)가 " + NPCManager.manage.NPCRequests[requestNo].getDesiredItemName() + "(을)를 가져와 달라고 요청했습니다");
             __instance.questDesc.text = text;
             __instance.questDateGiven.text = "하루가 끝나기 전까지";
-        }
-
-        //ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(BulletinBoard), "getMissionText")]
-        public static void BulletinBoard_getMissionText_Patch(BulletinBoard __instance, int missionNo, ref string __result)
-        {
-            var attachedPosts = __instance.attachedPosts;
-            BullitenBoardPost postPostsById = attachedPosts[missionNo].getPostPostsById();
-            string text = "";
-            if (attachedPosts[missionNo].isTrade)
-            {
-                text = attachedPosts[missionNo].getPostPostsById().getBoardRequestItem(missionNo) + "(와)과 " + attachedPosts[missionNo].getPostedByName() + "교환하기";
-            }
-
-            if (attachedPosts[missionNo].isHuntingTask)
-            {
-                text = "<sprite=12> 지도에서 마지막으로 알려진 위치를 이용해서 " + postPostsById.getBoardHuntRequestAnimal(missionNo) + "(을)를 사냥하세요";
-
-                if (attachedPosts[missionNo].readyForNPC)
-                {
-                    text = "<sprite=12> " + attachedPosts[missionNo].getPostedByName() + "(와)과 대화하기";
-                }
-            }
-
-            if (attachedPosts[missionNo].isInvestigation)
-            {
-                text = "<sprite=13> 지도의 위치를 방문하여 조사하세요";
-            }
-
-            __result = KoreanCheck.ReplaceJosa(text);
         }
 
         //ADD
@@ -559,269 +1093,6 @@ namespace DinkumKorean
                 __instance.missionText = missionText;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] {typeof(string), typeof(Sprite)})]
-        public static void PickUpNotification_fillButtonPrompt_Patch(PickUpNotification __instance, string buttonPromptText)
-        {
-            string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText.Trim());
-            if (text.Contains("구입"))
-            {
-                text = text.Replace("구입", "") + " 구입";
-            }
-            if (text.Contains("대화하기"))
-            {
-                text = text.Replace("대화하기", "") + " 대화하기";
-            }
-            __instance.itemText.text = text.Trim();
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] { typeof(string), typeof(Input_Rebind.RebindType) })]
-        public static void PickUpNotification_fillButtonPrompt_Patch2(PickUpNotification __instance, string buttonPromptText)
-        {
-            string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText.Trim());
-            if (text.Contains("구입"))
-            {
-                text = text.Replace("구입", "") + " 구입";
-            }
-            if (text.Contains("대화하기"))
-            {
-                text = text.Replace("대화하기", "") + " 대화하기";
-            }
-            __instance.itemText.text = text.Trim();
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(AnimalHouseMenu), "fillData")]
-        public static void AnimalHouseMenu_fillData_Patch(AnimalHouseMenu __instance)
-        {
-            __instance.eatenText.text = __instance.eatenText.text.Replace("Eaten", "먹이주기");
-            __instance.shelterText.text = __instance.shelterText.text.Replace("Shelter", "쉼터");
-            __instance.pettedText.text = __instance.pettedText.text.Replace("Petted", "쓰다듬기");
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(CustomNetworkManager), "refreshLobbyTypeButtons")]
-        public static void CustomNetworkManager_refreshLobbyTypeButtons_Patch(CustomNetworkManager __instance)
-        {
-            __instance.friendGameText.text = __instance.friendGameText.text.Replace("Friends Only", "친구만");
-            __instance.inviteOnlyText.text = __instance.inviteOnlyText.text.Replace("InviteOnly", "초대만");
-            __instance.publicGameText.text = __instance.publicGameText.text.Replace("Public", "공개");
-            __instance.lanGameText.text = __instance.lanGameText.text.Replace("LAN", "LAN");
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(Licence), "getConnectedSkillName")]
-        public static void Licence_getConnectedSkillName_Patch(ref string __result)
-        {
-            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(SeasonAndTime), "capitaliseFirstLetter")]
-        public static bool SeasonAndTime_capitaliseFirstLetter_Patch(ref string __result, string toChange)
-        {
-            Debug.Log($"SeasonAndTime_capitaliseFirstLetter_Patch 1:{toChange}");
-            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, toChange);
-            Debug.Log($"SeasonAndTime_capitaliseFirstLetter_Patch 2:{__result}");
-            return false;
-        }
-
-        // ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "getMissionText")]
-        public static void NPCRequest_getMissionText_Patch(NPCRequest __instance, int npcId, ref string __result)
-        {
-            __result = "<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
-
-            if (__instance.specificDesiredItem != -1)
-            {
-                string text = " [" + __instance.checkAmountOfItemsInInv() + "/" + __instance.desiredAmount + "]";
-
-                __result = "<sprite=12> " + __instance.getDesiredItemName() + " 수집하기" + text + "\n<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
-
-                if (__instance.checkAmountOfItemsInInv() >= __instance.desiredAmount)
-                {
-                    __result = "<sprite=13> " + __instance.getDesiredItemName() + " 수집하기" + text + "\n<sprite=12> " + NPCManager.manage.NPCDetails[npcId].NPCName + "에게 " + __instance.getDesiredItemName() + " 가져다주기";
-                }
-            }
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomBugNoAndLocation")]
-        public static void NPCRequest_setRandomBugNoAndLocation_Patch(NPCRequest __instance)
-        {
-            __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomFishNoAndLocation")]
-        public static void NPCRequest_setRandomFishNoAndLocation_Patch(NPCRequest __instance)
-        {
-            __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
-        }
-
-        // ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "getDesiredItemNameByNumber")]
-        public static void NPCRequest_getDesiredItemNameByNumber_Patch(int invId, int amount, ref string __result)
-        {
-            __result = Inventory.inv.allItems[invId].getInvItemName() + " " + amount + "개";
-
-            if (amount == 1)
-            {
-                __result = Inventory.inv.allItems[invId].getInvItemName();
-            }
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(AnimalManager), "fillAnimalLocation")]
-        public static void AnimalManager_fillAnimalLocation_Patch(ref string __result)
-        {
-            Debug.Log($"AnimalManager_fillAnimalLocation_Patch 1:{__result}");
-            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
-            Debug.Log($"AnimalManager_fillAnimalLocation_Patch 2:{__result}");
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(AnimalManager), "capitaliseFirstLetter")]
-        public static bool AnimalManager_capitaliseFirstLetter_Patch(ref string __result, string toChange)
-        {
-            Debug.Log($"AnimalManager_capitaliseFirstLetter_Patch 1:{toChange}");
-            __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, toChange);
-            Debug.Log($"AnimalManager_capitaliseFirstLetter_Patch 2:{__result}");
-            return false;
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(Inventory), "getExtraDetails")]
-        public static bool Inventory_getExtraDetails_Patch(Inventory __instance, int itemId, ref string __result)
-        {
-            var _this = __instance;
-            string text = "";
-            if (_this.allItems[itemId].placeable && _this.allItems[itemId].placeable.tileObjectGrowthStages && !_this.allItems[itemId].consumeable)
-            {
-                string text2 = "";
-                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
-                {
-                    text2 = "모든 계절";
-                }
-                else
-                {
-                    bool flag = false;
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer)
-                    {
-                        text2 = "여름";
-                        flag = true;
-                    }
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
-                    {
-                        if (flag)
-                        {
-                            text2 = text2 + ", 가을";
-                        }
-                        else
-                            text2 = "가을";
-
-                    }
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter)
-                    {
-                        if (flag)
-                        {
-                            text2 = text2 + ", 겨울";
-                        }
-                        else
-                            text2 = "겨울";
-
-                    }
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring)
-                    {
-                        if (flag)
-                        {
-                            text2 = text2 + ", 봄";
-                        }
-                        else
-                            text2 = "봄";
-                    }
-                    text2 += "에";
-                }
-                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.needsTilledSoil)
-                {
-                    text = text + "이 작물은 " + text2 + " 자랍니다. ";
-                }
-                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length != 0)
-                {
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
-                    {
-                        text = string.Concat(new string[]
-                        {
-                        text,
-                        "<b>",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length.ToString(),
-                        "</b>(으)로 <b>",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                        "</b>(이)가 나오므로 주변에 공간이 필요합니다. 이 작물은 최대 4개의 가지를 가질수 있습니다"
-                        });
-                    }
-                    else
-                    {
-                        text = string.Concat(new string[]
-                        {
-                        text,
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString(),
-                        "일 동안 자랍니다. ",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
-                        "개의 ",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                        "(을)를 생산합니다. "
-                        });
-                    }
-                }
-                if (!_this.allItems[itemId].placeable.tileObjectGrowthStages.diesOnHarvest && !_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
-                {
-                    text = string.Concat(new string[]
-                    {
-                    text,
-                    "계속해서 ",
-                    Mathf.Abs(_this.allItems[itemId].placeable.tileObjectGrowthStages.takeOrAddFromStateOnHarvest).ToString(),
-                    "일마다 ",
-                    _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
-                    "개의 ",
-                    _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                    "(을)를 수확할 수 있습니다."
-                    });
-                }
-                if (!WorldManager.manageWorld.allObjectSettings[_this.allItems[itemId].placeable.tileObjectId].walkable)
-                {
-                    text += " 아, 여기에 붙어서 자라기 위한 식물 받침대도 필요합니다.";
-                }
-            }
-            __result = KoreanCheck.ReplaceJosa(text);
-            return false;
-        }
-
-        //ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(InventoryItemDescription), "fillItemDescription")]
-        public static void InventoryItemDescription_fillItemDescription_Patch(InventoryItemDescription __instance, InventoryItem item)
-        {
-            if (((bool)item.placeable && (bool)item.placeable.sprinklerTile) || ((bool)item.placeable && item.placeable.tileObjectId == 16))
-            {
-                __instance.reachTiles.SetActive(value: true);
-                if (item.placeable.tileObjectId == 16)
-                {
-                    __instance.reachTileText.text = "최대 12개의 타일에 대해 특정 생산 장치의 속도를 높입니다";
-                }
-                else if (!item.placeable.sprinklerTile.isTank && !item.placeable.sprinklerTile.isSilo)
-                {
-                    __instance.reachTileText.text = item.placeable.sprinklerTile.verticlSize + "개의 타일에 도달합니다.\n<color=red>물탱크가 필요합니다</color>";
-                }
-                else if (item.placeable.sprinklerTile.isTank)
-                {
-                    __instance.reachTileText.text = "스프링클러에 물을 " + item.placeable.sprinklerTile.verticlSize + "타일 밖으로 제공합니다.";
-                }
-                else if (item.placeable.sprinklerTile.isSilo)
-                {
-                    __instance.reachTileText.text = "동물 사료통을 " + item.placeable.sprinklerTile.verticlSize + "타일 밖으로 채웁니다.\n<color=red>동물사료가 필요합니다</color>";
-                }
-            }
-        }
-
-        //ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(BugAndFishCelebration), "openWindow")]
-        public static void BugAndFishCelebration_openWindow_Patch(BugAndFishCelebration __instance, int invItem)
-        {
-            string text = Inventory.inv.allItems[invItem].getInvItemName() + "(을)를 잡았다!";
-            text = KoreanCheck.ReplaceJosa(text);
-            __instance.celebrationText.text = text;
-        }
-
-
+        #endregion Postfix
     }
 }

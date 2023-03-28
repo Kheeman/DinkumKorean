@@ -132,5 +132,6 @@
     <Compile Include="StartTranslatePatch.cs" />
     <Compile Include="StringReturnPatch.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

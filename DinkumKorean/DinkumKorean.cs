@@ -16,9 +16,12 @@ using I2LocPatch;
 
 namespace DinkumKorean
 {
-    [BepInPlugin("Kheeman.Dinkum.DinkumKorean", "DinkumKorean", "1.0.1")]
+    [BepInPlugin(GUID, PluginName, Version)]
     public class DinkumKoreanPlugin : BaseUnityPlugin
     {
+        public const string GUID = "Kheeman.Dinkum.DinkumKorean";
+        public const string PluginName = "DinkumKorean";
+        public const string Version = "1.0.3";
         public static DinkumKoreanPlugin Inst;
 
         public static bool Pause
@@ -99,7 +102,7 @@ namespace DinkumKorean
 
         public void ErrorWindowFunc()
         {
-            GUILayout.Label("请注意检查是否有新版本汉化");
+            GUILayout.Label("새 버전이 있는지 확인하세요");
             GUILayout.Label(ErrorStr);
         }
 
