@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
-using I2.Loc;
 using UnityEngine;
 using I2LocPatch;
 using Mirror;
@@ -121,107 +119,154 @@ namespace DinkumKorean
         [HarmonyPrefix, HarmonyPatch(typeof(Inventory), "getExtraDetails")]
         public static bool Inventory_getExtraDetails_Patch(Inventory __instance, int itemId, ref string __result)
         {
-            var _this = __instance;
-            string text = "";
-            if (_this.allItems[itemId].placeable && _this.allItems[itemId].placeable.tileObjectGrowthStages && !_this.allItems[itemId].consumeable)
+            try
             {
-                string text2 = "";
-                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
+                var _this = __instance;
+                string text = "";
+                if (_this.allItems[itemId].placeable && _this.allItems[itemId].placeable.tileObjectGrowthStages && !_this.allItems[itemId].consumeable)
                 {
-                    text2 = "모든 계절";
-                }
-                else
-                {
-                    bool flag = false;
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer)
+                    string text2 = "";
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring && _this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
                     {
-                        text2 = "여름";
-                        flag = true;
+                        text2 = UIAnimationManager.manage.getCharacterNameTag("모든 계절");
                     }
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
+                    else
                     {
-                        if (flag)
+                        bool flag = false;
+                        if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSummer)
                         {
-                            text2 = text2 + ", 가을";
+                            text2 = UIAnimationManager.manage.getCharacterNameTag("여름");
+                            flag = true;
                         }
-                        else
-                            text2 = "가을";
+                        if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInAutum)
+                        {
+                            if (flag)
+                            {
+                                text2 += UIAnimationManager.manage.getCharacterNameTag(", 가을");
+                            }
+                            else
+                                text2 = UIAnimationManager.manage.getCharacterNameTag("가을");
 
-                    }
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter)
-                    {
-                        if (flag)
-                        {
-                            text2 = text2 + ", 겨울";
                         }
-                        else
-                            text2 = "겨울";
+                        if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInWinter)
+                        {
+                            if (flag)
+                            {
+                                text2 += UIAnimationManager.manage.getCharacterNameTag(", 겨울");
+                            }
+                            else
+                                text2 = UIAnimationManager.manage.getCharacterNameTag("겨울");
 
-                    }
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring)
-                    {
-                        if (flag)
-                        {
-                            text2 = text2 + ", 봄";
                         }
-                        else
-                            text2 = "봄";
-                    }
-                    text2 += "에";
-                }
-                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.needsTilledSoil)
-                {
-                    text = text + "이 작물은 " + text2 + " 자랍니다. ";
-                }
-                if (_this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length != 0)
-                {
-                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
-                    {
-                        text = string.Concat(new string[]
+                        if (_this.allItems[itemId].placeable.tileObjectGrowthStages.growsInSpring)
                         {
+                            if (flag)
+                            {
+                                text2 += UIAnimationManager.manage.getCharacterNameTag(", 봄");
+                            }
+                            else
+                                text2 = UIAnimationManager.manage.getCharacterNameTag("봄");
+                        }
+                        text2 += "에";
+                    }
+
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.needsTilledSoil)
+                    {
+                        text = text + "이 작물은 " + text2 + " 자랍니다. ";
+                    }
+
+                    //add
+                    string text4;
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length != 0 || (_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto && _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length != 0))
+                    {
+                        string text3 = "";
+                        bool flag = false;
+                        if (_this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length != 0)
+                        {
+                            if (_this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length > 1)
+                            {
+                                flag = true;
+                            }
+                            text3 = _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName();
+                        }
+                        else if (_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
+                        {
+                            if (_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length > 1)
+                            {
+                                flag = true;
+                            }
+                            text3 = _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestDrop.getInvItemName();
+                        }
+                        text4 = UIAnimationManager.manage.getItemColorTag(text3);
+                    }
+                    else
+                    {
+                        text4 = "???";
+                    }
+
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length != 0)
+                    {
+                        if (_this.allItems[itemId].burriedPlaceable)
+                        {
+                            __result = "땅에 묻어야 합니다. " + _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString() + "일이 지나면 자랍니다.";
+                            return false;
+                        }
+                        if (_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
+                        {
+                            text = string.Concat(new string[]
+                            {
                         text,
                         "<b>",
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length.ToString(),
                         "</b>(으)로 <b>",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestDrop.getInvItemName(),
-                        "</b>(이)가 나오므로 주변에 공간이 필요합니다. 이 작물은 최대 4개의 가지를 가질수 있습니다"
-                        });
-                    }
-                    else
-                    {
-                        text = string.Concat(new string[]
+                        text4,
+                        "</b>(이)가 나오므로 주변에 공간이 필요합니다! 이 작물은 최대 4개의 가지를 가질수 있습니다"
+                            });
+                        }
+                        else
                         {
+                            text = string.Concat(new string[]
+                            {
                         text,
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString(),
                         "일 동안 자랍니다. ",
                         _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
                         "개의 ",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
+                        text4,
                         "(을)를 생산합니다. "
-                        });
+                            });
+                        }
                     }
-                }
-                if (!_this.allItems[itemId].placeable.tileObjectGrowthStages.diesOnHarvest && !_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
-                {
-                    text = string.Concat(new string[]
+
+                    if (!_this.allItems[itemId].placeable.tileObjectGrowthStages.diesOnHarvest && !_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
                     {
+                        text = string.Concat(new string[]
+                        {
                     text,
                     "계속해서 ",
                     Mathf.Abs(_this.allItems[itemId].placeable.tileObjectGrowthStages.takeOrAddFromStateOnHarvest).ToString(),
                     "일마다 ",
                     _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
                     "개의 ",
-                    _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestDrop.getInvItemName(),
+                    text4,
                     "(을)를 수확할 수 있습니다."
-                    });
+                        });
+                    }
+
+                    if (!WorldManager.manageWorld.allObjectSettings[_this.allItems[itemId].placeable.tileObjectId].walkable)
+                    {
+                        text = text + "아, 여기에 붙어서 자라기 위한" + UIAnimationManager.manage.getItemColorTag("식물 받침대") + "도 필요합니다.";
+                    }
+
                 }
-                if (!WorldManager.manageWorld.allObjectSettings[_this.allItems[itemId].placeable.tileObjectId].walkable)
-                {
-                    text += " 아, 여기에 붙어서 자라기 위한 식물 받침대도 필요합니다.";
-                }
+                __result = KoreanCheck.ReplaceJosa(text);
+                return false;
             }
-            __result = KoreanCheck.ReplaceJosa(text);
-            return false;
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return true;
+            }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(NetworkMapSharer), "UserCode_RpcDeliverAnimal")]
