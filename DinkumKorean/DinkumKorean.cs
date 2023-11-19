@@ -1,18 +1,17 @@
-﻿using BepInEx;
+﻿using TMPro;
 using I2.Loc;
+using System;
+using BepInEx;
+using XYModLib;
+using System.IO;
+using I2LocPatch;
 using HarmonyLib;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using System.Text.RegularExpressions;
 using System.Text;
-using TMPro;
-using System.IO;
 using BepInEx.Configuration;
-using XYModLib;
-using Newtonsoft.Json;
-using System;
-using I2LocPatch;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace DinkumKorean
 {
@@ -21,8 +20,22 @@ namespace DinkumKorean
     {
         public const string GUID = "Kheeman.Dinkum.DinkumKorean";
         public const string PluginName = "DinkumKorean";
-        public const string Version = "1.0.3";
+        public const string Version = "1.0.4";
         public static DinkumKoreanPlugin Inst;
+
+        public static IJson Json
+        {
+            get
+            {
+                if (_json == null)
+                {
+                    _json = new LitJsonHelper();
+                }
+                return _json;
+            }
+        }
+
+        private static IJson _json;
 
         public static bool Pause
         {
@@ -62,7 +75,7 @@ namespace DinkumKorean
             LogNoTranslation = Config.Bind<bool>("Tool", "LogNoTranslation", true, "번역되지 않은 대상을 출력할 수 있습니다.");
             DebugWindow = new UIWindow("언어 테스트 도구 [Ctrl+Numpad 4]");
             DebugWindow.OnWinodwGUI = DebugWindowGUI;
-            ErrorWindow = new UIWindow("언어 오류");
+            ErrorWindow = new UIWindow($"번역에 오류가 발생 {PluginName} v{Version}");
             ErrorWindow.OnWinodwGUI = ErrorWindowFunc;
             try
             {
@@ -116,29 +129,29 @@ namespace DinkumKorean
             if (DevMode.Value)
             {
                 // Ctrl + Numpad 4 GUI 전환
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad4))
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha4))
                 {
                     DebugWindow.Show = !DebugWindow.Show;
                 }
                 // Ctrl + Numpad 5 게임을 일시 중지, 게임 속도 1
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad5))
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha5))
                 {
                     Pause = !Pause;
                     Time.timeScale = Pause ? 0 : 1;
                 }
                 // Ctrl + Numpad 6 게임을 일시 중지, 게임 속도 10.
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad6))
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha6))
                 {
                     Pause = !Pause;
                     Time.timeScale = Pause ? 1 : 10;
                 }
                 // Ctrl + Numpad 7 숨겨진 텍스트를 제외한 장면의 모든 텍스트를 덤프합니다.
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad7))
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha7))
                 {
                     DumpText(false);
                 }
                 // Ctrl + Numpad 8 숨겨진 텍스트를 포함하여 장면의 모든 텍스트를 덤프합니다.
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad8))
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha8))
                 {
                     DumpText(true);
                 }
@@ -252,17 +265,18 @@ namespace DinkumKorean
         {
             LocalizationManager.CurrentLanguage = "Chinese";
         }
-
+        
         [HarmonyPrefix, HarmonyPatch(typeof(RealWorldTimeLight), "setUpDayAndDate")]
         public static bool RealWorldTimeLight_setUpDayAndDate_Patch(RealWorldTimeLight __instance)
         {
-            __instance.seasonAverageTemp = __instance.seasonAverageTemps[WorldManager.manageWorld.month - 1];
-            __instance.DayText.text = __instance.getDayName(WorldManager.manageWorld.day - 1);
-            __instance.DateText.text = (WorldManager.manageWorld.day + (WorldManager.manageWorld.week - 1) * 7).ToString("00");
-            __instance.SeasonText.text = __instance.getSeasonName(WorldManager.manageWorld.month - 1);
+            __instance.seasonAverageTemp = __instance.seasonAverageTemps[WorldManager.Instance.month - 1];
+            __instance.DayText.text = __instance.getDayName(WorldManager.Instance.day - 1);
+            __instance.DateText.text = (WorldManager.Instance.day + (WorldManager.Instance.week - 1) * 7).ToString("00");
+            __instance.SeasonText.text = __instance.getSeasonName(WorldManager.Instance.month - 1);
+            SeasonManager.manage.checkSeasonAndChangeMaterials();
             return false;
         }
-
+        
         [HarmonyPrefix, HarmonyPatch(typeof(Conversation), "getIntroName")]
         public static bool Conversation_getIntroName(Conversation __instance, ref string __result, int i)
         {
@@ -271,15 +285,15 @@ namespace DinkumKorean
             __result = result;
             if (!LocalizationManager.Sources[0].ContainsTerm(result))
             {
-                if (__instance.startLineAlt.aConverstationSequnce.Length > i)
+                if (__instance.startLineAlt.sequence.Length > i)
                 {
-                    if (string.IsNullOrWhiteSpace(__instance.startLineAlt.aConverstationSequnce[i]))
+                    if (string.IsNullOrWhiteSpace(__instance.startLineAlt.sequence[i]))
                     {
                         __result = result;
                     }
                     else
                     {
-                        __result = result + "_" + __instance.startLineAlt.aConverstationSequnce[i].GetHashCode();
+                        __result = result + "_" + __instance.startLineAlt.sequence[i].GetHashCode();
                     }
                 }
             }
@@ -323,15 +337,15 @@ namespace DinkumKorean
             {
                 if (__instance.responesAlt.Length > i)
                 {
-                    if (__instance.responesAlt[i].aConverstationSequnce.Length > r)
+                    if (__instance.responesAlt[i].sequence.Length > r)
                     {
-                        if (string.IsNullOrWhiteSpace(__instance.responesAlt[i].aConverstationSequnce[r]))
+                        if (string.IsNullOrWhiteSpace(__instance.responesAlt[i].sequence[r]))
                         {
                             __result = result;
                         }
                         else
                         {
-                            __result = result + "_" + __instance.responesAlt[i].aConverstationSequnce[r].GetHashCode();
+                            __result = result + "_" + __instance.responesAlt[i].sequence[r].GetHashCode();
                         }
                     }
                 }
@@ -379,7 +393,7 @@ namespace DinkumKorean
                 MatchCollection mc2 = reg.Matches(term.Languages[3]);
                 if (mc1.Count != mc2.Count)
                 {
-                    string log = $"行号:{i + hangOffset} Key:{term.Term} 中的括号数量不一致 英文原文有{mc1.Count}对括号 中文中有{mc2.Count}对括号";
+                    string log = $"줄번호:{i + hangOffset} Key:{term.Term} 괄호 갯수가 맞지 않습니다. 원본 괄호 {mc1.Count}개 번역 괄호 {mc2.Count}개 원문:{term.Languages[0]} 번역:{term.Languages[3]}";
                     LogInfo(log);
                     sb.AppendLine(log);
                     findCount++;
@@ -500,15 +514,15 @@ namespace DinkumKorean
             foreach (var c in conversations)
             {
                 // Intro
-                for (int i = 0; i < c.startLineAlt.aConverstationSequnce.Length; i++)
+                for (int i = 0; i < c.startLineAlt.sequence.Length; i++)
                 {
                     string key = c.getIntroName(i);
                     if (!LocalizationManager.Sources[0].ContainsTerm(key))
                     {
-                        if (!string.IsNullOrWhiteSpace(c.startLineAlt.aConverstationSequnce[i]))
+                        if (!string.IsNullOrWhiteSpace(c.startLineAlt.sequence[i]))
                         {
-                            string term = $"{key}_{c.startLineAlt.aConverstationSequnce[i].GetHashCode()}";
-                            string line = $"{term}\t{c.startLineAlt.aConverstationSequnce[i].StrToI2Str()}";
+                            string term = $"{key}_{c.startLineAlt.sequence[i].GetHashCode()}";
+                            string line = $"{term}\t{c.startLineAlt.sequence[i].StrToI2Str()}";
                             if (terms.Contains(term))
                             {
                                 string log = $"중복 대사 무시. {line}";
@@ -519,7 +533,7 @@ namespace DinkumKorean
                                 terms.Add(term);
                                 TermLine termLine = new TermLine();
                                 termLine.Name = term;
-                                termLine.Texts = new string[] { c.startLineAlt.aConverstationSequnce[i] };
+                                termLine.Texts = new string[] { c.startLineAlt.sequence[i] };
                                 i2File.Lines.Add(termLine);
                                 //sb.AppendLine(line);
                                 LogInfo(line);
@@ -561,15 +575,15 @@ namespace DinkumKorean
                 // Respone
                 for (int k = 0; k < c.responesAlt.Length; k++)
                 {
-                    for (int l = 0; l < c.responesAlt[k].aConverstationSequnce.Length; l++)
+                    for (int l = 0; l < c.responesAlt[k].sequence.Length; l++)
                     {
                         string key = c.getResponseName(k, l);
                         if (!LocalizationManager.Sources[0].ContainsTerm(key))
                         {
-                            if (!string.IsNullOrWhiteSpace(c.responesAlt[k].aConverstationSequnce[l]))
+                            if (!string.IsNullOrWhiteSpace(c.responesAlt[k].sequence[l]))
                             {
-                                string term = $"{key}_{c.responesAlt[k].aConverstationSequnce[l].GetHashCode()}";
-                                string line = $"{term}\t{c.responesAlt[k].aConverstationSequnce[l].StrToI2Str()}";
+                                string term = $"{key}_{c.responesAlt[k].sequence[l].GetHashCode()}";
+                                string line = $"{term}\t{c.responesAlt[k].sequence[l].StrToI2Str()}";
                                 if (terms.Contains(term))
                                 {
                                     string log = $"중복 대사 무시. {line}";
@@ -581,7 +595,7 @@ namespace DinkumKorean
                                     //sb.AppendLine(line);
                                     TermLine termLine = new TermLine();
                                     termLine.Name = term;
-                                    termLine.Texts = new string[] { c.responesAlt[k].aConverstationSequnce[l] };
+                                    termLine.Texts = new string[] { c.responesAlt[k].sequence[l] };
                                     i2File.Lines.Add(termLine);
                                     LogInfo(line);
                                 }
@@ -614,7 +628,7 @@ namespace DinkumKorean
                 list2.Add(new TextLocData(p.title, ""));
                 list2.Add(new TextLocData(p.contentText, ""));
             }
-            var json = JsonConvert.SerializeObject(list2, Formatting.Indented);
+            var json = Json.ToJson(list2, true);
             File.WriteAllText($"{Paths.GameRootPath}/I2/PostTextLoc.json", json);
             Debug.Log(json);
         }
@@ -628,7 +642,7 @@ namespace DinkumKorean
                 list.Add(new TextLocData(q.QuestName, ""));
                 list.Add(new TextLocData(q.QuestDescription, ""));
             }
-            var json = JsonConvert.SerializeObject(list, Formatting.Indented);
+            var json = Json.ToJson(list, true);
             File.WriteAllText($"{Paths.GameRootPath}/I2/QuestTextLoc.json", json);
             Debug.Log(json);
         }
@@ -648,7 +662,7 @@ namespace DinkumKorean
             foreach (var m in mgr.fishingTips) list.Add(new TextLocData(m.letterText, ""));
             foreach (var m in mgr.bugTips) list.Add(new TextLocData(m.letterText, ""));
             foreach (var m in mgr.licenceLevelUp) list.Add(new TextLocData(m.letterText, ""));
-            var json = JsonConvert.SerializeObject(list, Formatting.Indented);
+            var json = Json.ToJson(list, true);
             File.WriteAllText($"{Paths.GameRootPath}/I2/MailTextLoc.json", json);
             Debug.Log(json);
         }
@@ -658,7 +672,7 @@ namespace DinkumKorean
             var mgr = GameObject.FindObjectOfType<LoadingScreenImageAndTips>(true);
             List<TextLocData> list = new List<TextLocData>();
             foreach (var tip in mgr.tips) list.Add(new TextLocData(tip, ""));
-            var json = JsonConvert.SerializeObject(list, Formatting.Indented);
+            var json = Json.ToJson(list, true);
             File.WriteAllText($"{Paths.GameRootPath}/I2/TipsTextLoc.json", json);
             Debug.Log(json);
         }
@@ -668,7 +682,7 @@ namespace DinkumKorean
             var mgr = AnimalManager.manage;
             List<TextLocData> list = new List<TextLocData>();
             foreach (var a in mgr.allAnimals) list.Add(new TextLocData(a.animalName, ""));
-            var json = JsonConvert.SerializeObject(list, Formatting.Indented);
+            var json = Json.ToJson(list, true);
             File.WriteAllText($"{Paths.GameRootPath}/I2/AnimalsTextLoc.json", json);
             Debug.Log(json);
         }
@@ -678,9 +692,9 @@ namespace DinkumKorean
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Key\tEnglish");
             List<string> keys = new List<string>();
-            foreach (var item in Inventory.inv.allItems)
+            foreach (var item in Inventory.Instance.allItems)
             {
-                int id = Inventory.inv.getInvItemId(item);
+                int id = Inventory.Instance.getInvItemId(item);
                 string nameKey = "InventoryItemNames/InvItem_" + id.ToString();
                 string descKey = "InventoryItemDescriptions/InvDesc_" + id.ToString();
                 if (!LocalizationManager.Sources[0].ContainsTerm(nameKey))

@@ -45,7 +45,7 @@ namespace DinkumKoreanPublishTool
             CopyFile("BepInEx/plugins/I2LocPatch.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/I2LocPatch.dll");
             CopyFile("BepInEx/plugins/I18NFont4UnityGame.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/I18NFont4UnityGame.dll");
             CopyFile("BepInEx/plugins/XYModLib.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/XYModLib.dll");
-            CopyFile("BepInEx/plugins/Newtonsoft.Json.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/Newtonsoft.Json.dll");
+            CopyFile("BepInEx/plugins/LitJSON.dll", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/LitJSON.dll");
             // 글꼴 및 텍스트 복사
             CopyDirectory("BepInEx/plugins/I2LocPatch", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/I2LocPatch");
             CopyDirectory("BepInEx/plugins/I18NFont4UnityGame", "DinkumKoreanPublish/DinkumKorean/BepInEx/plugins/I18NFont4UnityGame");
@@ -67,7 +67,7 @@ namespace DinkumKoreanPublishTool
             CopyFile("BepInEx/plugins/I2LocPatch.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/I2LocPatch.dll");
             CopyFile("BepInEx/plugins/I18NFont4UnityGame.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/I18NFont4UnityGame.dll");
             CopyFile("BepInEx/plugins/XYModLib.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/XYModLib.dll");
-            CopyFile("BepInEx/plugins/Newtonsoft.Json.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/Newtonsoft.Json.dll");
+            CopyFile("BepInEx/plugins/LitJSON.dll", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/LitJSON.dll");
             // 글꼴 및 텍스트 복사
             CopyDirectory("BepInEx/plugins/I2LocPatch", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/I2LocPatch");
             CopyDirectory("BepInEx/plugins/I18NFont4UnityGame", "DinkumKoreanPublish/DinkumKorean_WithBepInEx/BepInEx/plugins/I18NFont4UnityGame");

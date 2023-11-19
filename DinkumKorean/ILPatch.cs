@@ -1,7 +1,10 @@
-﻿using HarmonyLib;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Text;
+using System.Threading.Tasks;
+using HarmonyLib;
 using UnityEngine;
 
 namespace DinkumKorean
@@ -107,7 +110,7 @@ namespace DinkumKorean
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(ConversationManager), "checkLineForReplacement")]
+        [HarmonyTranspiler, HarmonyPatch(typeof(ConversationManager), "CheckLineForReplacement")]
         public static IEnumerable<CodeInstruction> ConversationManager_checkLineForReplacement_Patch(IEnumerable<CodeInstruction> instructions)
         {
             instructions = ReplaceIL(instructions, "South City", "사우스 시티");
@@ -139,8 +142,8 @@ namespace DinkumKorean
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(ConversationManager), "talkToNPC")]
-        public static IEnumerable<CodeInstruction> ConversationManager_talkToNPC_Patch(IEnumerable<CodeInstruction> instructions)
+        [HarmonyTranspiler, HarmonyPatch(typeof(ConversationManager), "StartConversationWithAvailableNPC")]
+        public static IEnumerable<CodeInstruction> ConversationManager_StartConversationWithAvailableNPC_Patch(IEnumerable<CodeInstruction> instructions)
         {
             instructions = ReplaceIL(instructions, "A new deed is available!", "신규 증서가 신청 가능합니다!");
             instructions = ReplaceIL(instructions, "Talk to Fletch to apply for deeds.", "Fetch와 대화하여 증서를 신청하세요.");
@@ -158,8 +161,8 @@ namespace DinkumKorean
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(EquipItemToChar), "OnDestroy")]
-        public static IEnumerable<CodeInstruction> EquipItemToChar_OnDestroy_Patch(IEnumerable<CodeInstruction> instructions)
+        [HarmonyTranspiler, HarmonyPatch(typeof(EquipItemToChar), "OnDisable")]
+        public static IEnumerable<CodeInstruction> EquipItemToChar_OnDisable_Patch(IEnumerable<CodeInstruction> instructions)
         {
             instructions = ReplaceIL(instructions, " has left", "(이)가 떠났습니다");
             return instructions;
@@ -227,7 +230,7 @@ namespace DinkumKorean
         {
             instructions = ReplaceIL(instructions, "All year", "연간");
             instructions = ReplaceIL(instructions, "Summer", "여름");
-            instructions = ReplaceIL(instructions, "Autum", "가을");
+            instructions = ReplaceIL(instructions, "Autumn", "가을");
             instructions = ReplaceIL(instructions, "Winter", "겨울");
             instructions = ReplaceIL(instructions, "Spring", "봄");
             instructions = ReplaceIL(instructions, "Bury", "묻기");
@@ -611,7 +614,7 @@ namespace DinkumKorean
             }
             if (!success)
             {
-                Debug.LogWarning($"플러그인이 {target}(을)를 {i18n}(으)로 대체하는 데 실패, 대상을 찾을 수 없습니다.");
+                Debug.LogWarning($"플러그인이 {target} => {i18n} 대체하는 데 실패, 대상을 찾을 수 없습니다.");
             }
             return list.AsEnumerable();
         }
@@ -729,11 +732,10 @@ namespace DinkumKorean
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(WeatherManager), "currentWeather")]
-        public static IEnumerable<CodeInstruction> WeatherManager_currentWeather_Patch(IEnumerable<CodeInstruction> instructions)
+        [HarmonyTranspiler, HarmonyPatch(typeof(WeatherManager), "GetWeatherDescription")]
+        public static IEnumerable<CodeInstruction> WeatherManager_GetWeatherDescription_Patch(IEnumerable<CodeInstruction> instructions)
         {
-            instructions = ReplaceIL(instructions, "It is currently ", "현재 온도");
-            instructions = ReplaceIL(instructions, "° and ", "° 그리고 ");
+            instructions = ReplaceIL(instructions, "It is currently {0} ° and ", "현재 {0} °이고 ");
             instructions = ReplaceIL(instructions, "Storming", "폭풍우");
             instructions = ReplaceIL(instructions, "Raining", "비");
             instructions = ReplaceIL(instructions, "Foggy", "안개");
@@ -745,30 +747,30 @@ namespace DinkumKorean
             instructions = ReplaceIL(instructions, " Southern ", " 남");
             instructions = ReplaceIL(instructions, " Westernly ", " 서");
             instructions = ReplaceIL(instructions, " Easternly ", " 동");
-            instructions = ReplaceIL(instructions, " Wind.", "풍.");
+            instructions = ReplaceIL(instructions, " Wind.", "풍이 붑니다.");
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(WeatherManager), "tomorrowsWeather")]
-        public static IEnumerable<CodeInstruction> WeatherManager_tomorrowsWeather_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "Tomorrow expect ", "내일 일기예보:");
-            instructions = ReplaceIL(instructions, "Storms", "폭풍우");
-            instructions = ReplaceIL(instructions, "Rain", "비");
-            instructions = ReplaceIL(instructions, "Fog", "안개");
-            instructions = ReplaceIL(instructions, "Fine Weather", "맑은 날씨");
-            instructions = ReplaceIL(instructions, ". With", "와(과) 함께");
-            instructions = ReplaceIL(instructions, " Strong", "강한");
-            instructions = ReplaceIL(instructions, " Light", "약한");
-            instructions = ReplaceIL(instructions, " Northern ", " 북");
-            instructions = ReplaceIL(instructions, " Southern ", " 남");
-            instructions = ReplaceIL(instructions, " Westernly ", " 서");
-            instructions = ReplaceIL(instructions, " Easternly ", " 동");
-            instructions = ReplaceIL(instructions, "Wind. With temperatures around ", "풍. 주변 온도는 ");
-            instructions = ReplaceIL(instructions, "°.", "°.");
-            return instructions;
-        }
-        
+        //[HarmonyTranspiler, HarmonyPatch(typeof(WeatherManager), "tomorrowsWeather")]
+        //public static IEnumerable<CodeInstruction> WeatherManager_tomorrowsWeather_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "Tomorrow expect ", "내일 일기예보:");
+        //    instructions = ReplaceIL(instructions, "Storms", "폭풍우");
+        //    instructions = ReplaceIL(instructions, "Rain", "비");
+        //    instructions = ReplaceIL(instructions, "Fog", "안개");
+        //    instructions = ReplaceIL(instructions, "Fine Weather", "맑은 날씨");
+        //    instructions = ReplaceIL(instructions, ". With", "와(과) 함께");
+        //    instructions = ReplaceIL(instructions, " Strong", "강한");
+        //    instructions = ReplaceIL(instructions, " Light", "약한");
+        //    instructions = ReplaceIL(instructions, " Northern ", " 북");
+        //    instructions = ReplaceIL(instructions, " Southern ", " 남");
+        //    instructions = ReplaceIL(instructions, " Westernly ", " 서");
+        //    instructions = ReplaceIL(instructions, " Easternly ", " 동");
+        //    instructions = ReplaceIL(instructions, "Wind. With temperatures around ", "풍. 주변 온도는 ");
+        //    instructions = ReplaceIL(instructions, "°.", "°.");
+        //    return instructions;
+        //}
+
         // instructions = ReplaceIL(instructions, "", "");
     }
 }
