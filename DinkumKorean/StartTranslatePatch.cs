@@ -51,41 +51,46 @@ namespace DinkumKorean
         [HarmonyPostfix, HarmonyPatch(typeof(MailManager), "Start")]
         public static void MailManager_Start_Patch()
         {
-            var mgr = MailManager.manage;
-            mgr.animalResearchLetter.letterText
-               = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.animalResearchLetter.letterText);
-            mgr.returnTrapLetter.letterText
-               = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.returnTrapLetter.letterText);
-            mgr.devLetter.letterText
-               = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.devLetter.letterText);
-            mgr.catalogueItemLetter.letterText
-               = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.catalogueItemLetter.letterText);
-            mgr.craftmanDayOff.letterText
-               = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.craftmanDayOff.letterText);
-            foreach (var m in mgr.randomLetters)
+            foreach (var item in Resources.FindObjectsOfTypeAll<LetterTemplate>())
             {
-                m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
+                item.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, item.letterText);
             }
-            foreach (var m in mgr.thankYouLetters)
-            {
-                m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
-            }
-            foreach (var m in mgr.didNotFitInInvLetter)
-            {
-                m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
-            }
-            foreach (var m in mgr.fishingTips)
-            {
-                m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
-            }
-            foreach (var m in mgr.bugTips)
-            {
-                m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
-            }
-            foreach (var m in mgr.licenceLevelUp)
-            {
-                m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
-            }
+
+            //var mgr = MailManager.manage;
+            //mgr.animalResearchLetter.letterText
+            //   = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.animalResearchLetter.letterText);
+            //mgr.returnTrapLetter.letterText
+            //   = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.returnTrapLetter.letterText);
+            //mgr.devLetter.letterText
+            //   = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.devLetter.letterText);
+            //mgr.catalogueItemLetter.letterText
+            //   = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.catalogueItemLetter.letterText);
+            //mgr.craftmanDayOff.letterText
+            //   = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, mgr.craftmanDayOff.letterText);
+            //foreach (var m in mgr.randomLetters)
+            //{
+            //    m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
+            //}
+            //foreach (var m in mgr.thankYouLetters)
+            //{
+            //    m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
+            //}
+            //foreach (var m in mgr.didNotFitInInvLetter)
+            //{
+            //    m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
+            //}
+            //foreach (var m in mgr.fishingTips)
+            //{
+            //    m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
+            //}
+            //foreach (var m in mgr.bugTips)
+            //{
+            //    m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
+            //}
+            //foreach (var m in mgr.licenceLevelUp)
+            //{
+            //    m.letterText = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.MailTextLocList, m.letterText);
+            //}
         }
     }
 }

@@ -114,12 +114,33 @@ namespace DinkumKorean
         public static IEnumerable<CodeInstruction> ConversationManager_checkLineForReplacement_Patch(IEnumerable<CodeInstruction> instructions)
         {
             instructions = ReplaceIL(instructions, "South City", "사우스 시티");
+            instructions = ReplaceIL(instructions, "Animal Type", "동물 유형");
+            instructions = ReplaceIL(instructions, "Animal Name", "동물 이름");
             instructions = ReplaceIL(instructions, "Journal", "저널");
             instructions = ReplaceIL(instructions, "Licence", "면허증");
             instructions = ReplaceIL(instructions, "Licences", "면허증");
+            instructions = ReplaceIL(instructions, "Shift", "이동");
+            instructions = ReplaceIL(instructions, "Shifts", "이동");
             instructions = ReplaceIL(instructions, "Airship", "비행선");
+            instructions = ReplaceIL(instructions, "Airships", "비행선");
             instructions = ReplaceIL(instructions, "Nomad", "방랑자");
             instructions = ReplaceIL(instructions, "Nomads", "방랑자");
+            instructions = ReplaceIL(instructions, "Birthday", "생일");
+            instructions = ReplaceIL(instructions, "Permit Points", "허가 점수");
+            instructions = ReplaceIL(instructions, "Snag Sizzles", "소시지 구이");
+            instructions = ReplaceIL(instructions, "Snag Sizzle", "소시지 구이");
+            instructions = ReplaceIL(instructions, "Snag", "소시지");
+            instructions = ReplaceIL(instructions, "Snags", "소시지");
+            instructions = ReplaceIL(instructions, " Day", " 일");
+            instructions = ReplaceIL(instructions, "Sky Fest", "하늘 축제");
+            instructions = ReplaceIL(instructions, "Kite", "연");
+            instructions = ReplaceIL(instructions, "Flying Lantern", "풍등");
+            instructions = ReplaceIL(instructions, "Flying Lanterns", "풍등");
+            instructions = ReplaceIL(instructions, "Kite Making Table", "연 제작대");
+            instructions = ReplaceIL(instructions, "Aurora", "오로라");
+            instructions = ReplaceIL(instructions, " Year", " 년");
+            instructions = ReplaceIL(instructions, "reward", "보상");
+            instructions = ReplaceIL(instructions, "Animal", "동물");
             instructions = ReplaceIL(instructions, "I just love the colours!", "난 그냥 이 색깔들 좋아해요！");
             instructions = ReplaceIL(instructions, "I love this one.", "난 이것을 좋아해요.");
             instructions = ReplaceIL(instructions, "The composition is wonderful", "이 구성이 훌륭합니다");
@@ -135,9 +156,14 @@ namespace DinkumKorean
             instructions = ReplaceIL(instructions, "The design just came to me, y'know?", "디자인이 딱 떠올랐죠?");
             instructions = ReplaceIL(instructions, "Y'know, that would look great on you, ", "그게 당신에게 잘어울립니다, ");
             instructions = ReplaceIL(instructions, "I put a lot of myself into this one.", "저는 이 작품에 많은 노력을 기울였습니다.");
+            instructions = ReplaceIL(instructions, "darl", "딩딩");
+            instructions = ReplaceIL(instructions, "love", "뽀삐");
+            instructions = ReplaceIL(instructions, "possum", "쪼꼬미");
+            instructions = ReplaceIL(instructions, "Bug Catching Comp", "곤충 잡기 대회");
+            instructions = ReplaceIL(instructions, "Fishing Comp", "낚시 대회");
+            instructions = ReplaceIL(instructions, "Comp Log Book", "대회 안내서");
             instructions = ReplaceIL(instructions, "Beginning...", "시작중...");
             instructions = ReplaceIL(instructions, "...Nothing happened...", "...아무일도 없습니다...");
-            instructions = ReplaceIL(instructions, "Permit Points", "면허 점수");
             instructions = ReplaceIL(instructions, "s", "");
             return instructions;
         }
@@ -284,13 +310,13 @@ namespace DinkumKorean
             return instructions;
         }
 
-        [HarmonyTranspiler, HarmonyPatch(typeof(LicenceManager), "getLicenceLevelDescription")]
-        public static IEnumerable<CodeInstruction> LicenceManager_getLicenceLevelDescription_Patch(IEnumerable<CodeInstruction> instructions)
-        {
-            instructions = ReplaceIL(instructions, "Coming soon. The holder will get instant access to Building Level 3 once it has arrived",
-                "곧 나옵니다. 건물 등급 3에 도달하면 소유자가 즉시 접근할 수 있습니다.");
-            return instructions;
-        }
+        //[HarmonyTranspiler, HarmonyPatch(typeof(LicenceManager), "getLicenceLevelDescription")]
+        //public static IEnumerable<CodeInstruction> LicenceManager_getLicenceLevelDescription_Patch(IEnumerable<CodeInstruction> instructions)
+        //{
+        //    instructions = ReplaceIL(instructions, "Coming soon. The holder will get instant access to Building Level 3 once it has arrived",
+        //        "곧 나옵니다. 건물 등급 3에 도달하면 소유자가 즉시 접근할 수 있습니다.");
+        //    return instructions;
+        //}
 
         [HarmonyTranspiler, HarmonyPatch(typeof(LicenceManager), "openConfirmWindow")]
         public static IEnumerable<CodeInstruction> LicenceManager_openConfirmWindow_Patch(IEnumerable<CodeInstruction> instructions)
@@ -353,6 +379,23 @@ namespace DinkumKorean
         public static IEnumerable<CodeInstruction> NetworkNavMesh_waitForNameToChange_Patch(IEnumerable<CodeInstruction> instructions)
         {
             instructions = ReplaceIL(instructions, " has joined", "(이)가 합류했습니다");
+            return instructions;
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(NPCDoesTasks), "UserCode_RpcWave")]
+        public static IEnumerable<CodeInstruction> NPCDoesTasks_UserCode_RpcWave_Patch(IEnumerable<CodeInstruction> instructions)
+        {
+            instructions = ReplaceIL(instructions, "G'day!", "좋은날 되세요！");
+            instructions = ReplaceIL(instructions, "Nice to see you, ", "반가워요，");
+            instructions = ReplaceIL(instructions, "Hi, ", "안녕，");
+            instructions = ReplaceIL(instructions, "Hello, ", "안녕하세요，");
+            instructions = ReplaceIL(instructions, "G'day, ", "좋은날 이에요，");
+            instructions = ReplaceIL(instructions, "Happy ", "행복한 ");
+            instructions = ReplaceIL(instructions, " Day!", "의 날!");
+            instructions = ReplaceIL(instructions, " Day, ", "의 날, ");
+            instructions = ReplaceIL(instructions, "Happy Sky Fest!", "즐거운 하늘 축제!");
+            instructions = ReplaceIL(instructions, "Happy Sky Fest, ", "즐거운 하늘 축제에요, ");
+            instructions = ReplaceIL(instructions, "Have a good Sky Fest, ", "좋은 하늘 축제 보내세요, ");
             return instructions;
         }
 

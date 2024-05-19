@@ -20,7 +20,7 @@ namespace DinkumKorean
     {
         public const string GUID = "Kheeman.Dinkum.DinkumKorean";
         public const string PluginName = "DinkumKorean";
-        public const string Version = "1.0.4";
+        public const string Version = "1.0.5";
         public static DinkumKoreanPlugin Inst;
 
         public static IJson Json
@@ -62,10 +62,47 @@ namespace DinkumKorean
         public List<TextLocData> MailTextLocList = new List<TextLocData>();
         public List<TextLocData> AnimalsTextLocList = new List<TextLocData>();
 
+        public List<TextLocData> HoverTextLocList = new List<TextLocData>();
+        public List<TextLocData> NPCNameTextLocList = new List<TextLocData>();
+
         public UIWindow DebugWindow;
         public UIWindow ErrorWindow;
         public string ErrorStr;
         public bool IsPluginLoaded;
+
+        /// <summary>
+        /// 게임 시작 시 한 번만 처리하면 됩니다.
+        /// </summary>
+        public void OnGameStartOnceFix()
+        {
+            ReplaceNPCNames();
+            ReplaceHoverTexts();
+        }
+
+        /// <summary>
+        /// NPC 이름 바꾸기
+        /// </summary>
+        public void ReplaceNPCNames()
+        {
+            List<NPCDetails> coms = new List<NPCDetails>();
+            coms.AddRange(Resources.FindObjectsOfTypeAll<NPCDetails>());
+            foreach (var com in coms)
+            {
+                string cnText = TextLocData.GetLoc(NPCNameTextLocList, com.NPCName);
+                com.NPCName = cnText;
+            }
+        }
+
+        public void ReplaceHoverTexts()
+        {
+            List<HoverToolTipOnButton> coms = new List<HoverToolTipOnButton>();
+            coms.AddRange(Resources.FindObjectsOfTypeAll<HoverToolTipOnButton>());
+            foreach (var com in coms)
+            {
+                string cnText = TextLocData.GetLoc(HoverTextLocList, com.hoveringText);
+                com.hoveringText = cnText;
+            }
+        }
 
         private void Awake()
         {
@@ -106,6 +143,9 @@ namespace DinkumKorean
             TipsTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/TipsTextLoc.json");
             MailTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/MailTextLoc.json");
             AnimalsTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/AnimalsTextLoc.json");
+
+            NPCNameTextLocList = TextLocData.LoadFromTxtFile($"{Paths.PluginPath}/I2LocPatch/NPCNamesLoc.csv");
+            HoverTextLocList = TextLocData.LoadFromTxtFile($"{Paths.PluginPath}/I2LocPatch/HoverTextLoc.csv");
         }
 
         public void LogFlagTrue()
@@ -443,38 +483,7 @@ namespace DinkumKorean
             }
             return sb.ToString();
         }
-
-        /// <summary>
-        /// 当游戏开始时只需要一次的处理
-        /// </summary>
-        public void OnGameStartOnceFix()
-        {
-            // 动物的生物群系翻译
-            //AnimalManager.manage.northernOceanFish.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.northernOceanFish.locationName);
-            //AnimalManager.manage.southernOceanFish.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.southernOceanFish.locationName);
-            //AnimalManager.manage.riverFish.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.riverFish.locationName);
-            //AnimalManager.manage.mangroveFish.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.mangroveFish.locationName);
-            //AnimalManager.manage.billabongFish.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.billabongFish.locationName);
-            //AnimalManager.manage.topicalBugs.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.topicalBugs.locationName);
-            //AnimalManager.manage.desertBugs.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.desertBugs.locationName);
-            //AnimalManager.manage.bushlandBugs.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.bushlandBugs.locationName);
-            //AnimalManager.manage.pineLandBugs.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.pineLandBugs.locationName);
-            //AnimalManager.manage.plainsBugs.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.plainsBugs.locationName);
-            //AnimalManager.manage.underWaterOceanCreatures.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.underWaterOceanCreatures.locationName);
-            //AnimalManager.manage.underWaterRiverCreatures.locationName =
-            //    TextLocData.GetLoc(DynamicTextLocList, AnimalManager.manage.underWaterRiverCreatures.locationName);
-        }
+               
 
         #region Dump
 

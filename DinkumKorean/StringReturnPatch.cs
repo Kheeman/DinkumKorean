@@ -460,12 +460,24 @@ namespace DinkumKorean
         {
             try
             {
-                if (((bool)item.placeable && (bool)item.placeable.sprinklerTile) || ((bool)item.placeable && item.placeable.tileObjectId == 16))
+                if (((bool)item.placeable && (bool)item.placeable.sprinklerTile) || ((bool)item.placeable && item.placeable.tileObjectId == 16) || ((bool)item.placeable && item.placeable.tileObjectId == 703) || ((bool)item.placeable && item.placeable.tileObjectId == 36) || ((bool)item.placeable && item.placeable.tileObjectId == 773) || ((bool)item.placeable && item.placeable.tileObjectId == 852))
                 {
                     __instance.reachTiles.SetActive(value: true);
                     if (item.placeable.tileObjectId == 16)
                     {
-                        __instance.reachTileText.text = "최대 12개의 타일에 대해 특정 생산 장치의 속도를 높입니다";
+                        __instance.reachTileText.text = "최대 14개의 타일에 대해 특정 생산 장치의 속도를 높입니다";
+                    }
+                    else if (item.placeable.tileObjectId == 703)
+                    {
+                        __instance.reachTileText.text = "최대 8개의 타일에 대해 특정 생산 장치의 속도를 높입니다";
+                    }
+                    else if (item.placeable.tileObjectId == 36 || item.placeable.tileObjectId == 773)
+                    {
+                        __instance.reachTileText.text = "5 타일 떨어진 보관함에서 재료를 꺼낼 수 있습니다";
+                    }
+                    else if (item.placeable.tileObjectId == 852)
+                    {
+                        __instance.reachTileText.text = "10 타일 떨어진 보관함에 재료를 자동으로 저장을 합니다";
                     }
                     else if (!item.placeable.sprinklerTile.isTank && !item.placeable.sprinklerTile.isSilo)
                     {
@@ -803,7 +815,7 @@ namespace DinkumKorean
             }
             catch (Exception e) { Debug.LogException(e); }
         }
-
+        // QuestTracker todo
         [HarmonyPostfix, HarmonyPatch(typeof(QuestTracker), "displayMainQuest")]
         public static void QuestTracker_displayMainQuest_Patch(QuestTracker __instance, int questNo)
         {
