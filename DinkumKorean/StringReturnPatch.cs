@@ -209,98 +209,31 @@ namespace DinkumKorean
                     {
                         if (_this.allItems[itemId].burriedPlaceable)
                         {
-                            __result = "땅에 묻어야 합니다. " + _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString() + "일이 지나면 자랍니다.";
+                            __result = "땅에 묻어야 합니다. 그 후 " + _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString() + "일에 걸쳐 성장합니다.";
                             return false;
                         }
-                        if (_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
-                        {
-                            text = string.Concat(new string[]
-                            {
-                        text,
-                        "<b>",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length.ToString(),
-                        "</b>(으)로 <b>",
-                        text4,
-                        "</b>(이)가 나오므로 주변에 공간이 필요합니다! 이 작물은 최대 4개의 가지를 가질수 있습니다"
-                            });
-                        }
-                        else
-                        {
-                            text = string.Concat(new string[]
-                            {
-                        text,
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length.ToString(),
-                        "일 동안 자랍니다. ",
-                        _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
-                        "개의 ",
-                        text4,
-                        "(을)를 생산합니다. "
-                            });
-                        }
+
+                        text = ((!_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto) ?
+                            (text + _this.allItems[itemId].placeable.tileObjectGrowthStages.objectStages.Length + "일에 걸쳐 성장합니다. " + _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length + "개의 " + text4 + "(을)를 생산합니다.") :
+                            (text + "주변으로 퍼져나가 " + _this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto.tileObjectGrowthStages.harvestSpots.Length + "개의 " + text4 + "(을)를 생산하기 때문에 주변에 공간이 필요합니다. 이 작물은 최대 4개의 가지를 가질수 있습니다!"));
                     }
 
                     if (!_this.allItems[itemId].placeable.tileObjectGrowthStages.diesOnHarvest && !_this.allItems[itemId].placeable.tileObjectGrowthStages.steamsOutInto)
                     {
-                        text = string.Concat(new string[]
-                        {
-                    text,
-                    "계속해서 ",
-                    Mathf.Abs(_this.allItems[itemId].placeable.tileObjectGrowthStages.takeOrAddFromStateOnHarvest).ToString(),
-                    "일마다 ",
-                    _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length.ToString(),
-                    "개의 ",
-                    text4,
-                    "(을)를 수확할 수 있습니다."
-                        });
+                        text = text + " " + Mathf.Abs(_this.allItems[itemId].placeable.tileObjectGrowthStages.takeOrAddFromStateOnHarvest) + "일 마다 " + text4 + " " + _this.allItems[itemId].placeable.tileObjectGrowthStages.harvestSpots.Length + "개를 계속 생산합니다.";
                     }
 
                     if (!WorldManager.Instance.allObjectSettings[_this.allItems[itemId].placeable.tileObjectId].walkable)
                     {
-                        text = text + "아, 여기에 붙어서 자라기 위한" + UIAnimationManager.manage.GetItemColorTag("식물 받침대") + "도 필요합니다.";
+                        text = text + " 아, 여기에 붙어서 자라기 위한" + UIAnimationManager.manage.GetItemColorTag("식물 받침대") + "도 필요합니다.";
                     }
 
+                    if (_this.allItems[itemId].placeable.tileObjectGrowthStages.canGrowInTilledWater)
+                    {
+                        text += " 아, 그리고 얕은 물에 심으면 물을 줄 필요가 없습니다!";
+                    }
                 }
                 __result = KoreanCheck.ReplaceJosa(text);
-                return false;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                return true;
-            }
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(NetworkMapSharer), "UserCode_RpcDeliverAnimal")]
-        public static bool NetworkMapSharer_UserCode_RpcDeliverAnimal_Patch(uint deliveredBy, int animalDelivered, int variationDelivered, int rewardToSend, int trapType)
-        {
-            try
-            {
-                if (NetworkIdentity.spawned.ContainsKey(deliveredBy))
-                {
-                    CharMovement component = NetworkIdentity.spawned[deliveredBy].GetComponent<CharMovement>();
-                    var animal = AnimalManager.manage.allAnimals[animalDelivered];
-                    // 동물 이름 가져오기
-                    string animalName = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.AnimalsTextLocList, animal.animalName);
-                    string str = animalName;
-                    if (variationDelivered != 0)
-                    {
-                        string variationName = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, animal.hasVariation.variationAdjective[variationDelivered]);
-                        str = variationName + animalName;
-                    }
-
-                    string ret = KoreanCheck.ReplaceJosa(component.GetComponent<EquipItemToChar>().playerName + "(은)는 " + str + "(을)를 배달했습니다.");
-                    NotificationManager.manage.createChatNotification(ret, false);
-                    if (component.isLocalPlayer)
-                    {
-                        if (animalDelivered == 29)
-                        {
-                            MailManager.manage.sendAChrissyAnimalCapturedLetter(trapType);
-                            return false;
-                        }
-                        MailManager.manage.sendAnAnimalCapturedLetter(rewardToSend, trapType);
-                    }
-                }
-
                 return false;
             }
             catch (Exception e)
@@ -358,31 +291,31 @@ namespace DinkumKorean
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(AnimalManager), "fillAnimalLocation")]
-        public static void AnimalManager_fillAnimalLocation_Patch(ref string __result)
-        {
-            try
-            {
-                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-        }
+        //[HarmonyPostfix, HarmonyPatch(typeof(AnimalManager), "fillAnimalLocation")]
+        //public static void AnimalManager_fillAnimalLocation_Patch(ref string __result)
+        //{
+        //    try
+        //    {
+        //        __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.LogException(e);
+        //    }
+        //}
 
-        //ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(BugAndFishCelebration), "openWindow")]
-        public static void BugAndFishCelebration_openWindow_Patch(BugAndFishCelebration __instance, int invItem)
-        {
-            try
-            {
-                string text = Inventory.Instance.allItems[invItem].getInvItemName() + "(을)를 잡았다!";
-                text = KoreanCheck.ReplaceJosa(text);
-                __instance.celebrationText.text = text;
-            }
-            catch (Exception e) { Debug.LogException(e); }
-        }
+        ////ADD
+        //[HarmonyPostfix, HarmonyPatch(typeof(BugAndFishCelebration), "openWindow")]
+        //public static void BugAndFishCelebration_openWindow_Patch(BugAndFishCelebration __instance, int invItem)
+        //{
+        //    try
+        //    {
+        //        string text = Inventory.Instance.allItems[invItem].getInvItemName() + "(을)를 잡았다!";
+        //        text = KoreanCheck.ReplaceJosa(text);
+        //        __instance.celebrationText.text = text;
+        //    }
+        //    catch (Exception e) { Debug.LogException(e); }
+        //}
 
         //ADD
         [HarmonyPostfix, HarmonyPatch(typeof(BulletinBoard), "getMissionText")]
@@ -433,26 +366,54 @@ namespace DinkumKorean
             catch (Exception e) { Debug.LogException(e); }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameUnderMapCursor")]
-        public static void GenerateMap_getBiomeNameUnderMapCursor_Patch(ref string __result)
+        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] { typeof(string), typeof(Sprite) })]
+        public static void PickUpNotification_fillButtonPrompt_Patch(PickUpNotification __instance, string buttonPromptText)
         {
             try
             {
-                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result.StrToI2Str());
+                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText);
+                __instance.itemText.text = text;
             }
-            catch (Exception e) { Debug.LogException(e); }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameById")]
-        public static void GenerateMap_getBiomeNameById_Patch(ref string __result, int id)
+        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] { typeof(string), typeof(Input_Rebind.RebindType) })]
+        public static void PickUpNotification_fillButtonPrompt_Patch2(PickUpNotification __instance, string buttonPromptText)
         {
             try
             {
-                GenerateMap.biomNames biomNames = (GenerateMap.biomNames)id;
-                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, biomNames.ToString());
+                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText);
+                __instance.itemText.text = text;
             }
-            catch (Exception e) { Debug.LogException(e); }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
+
+        //[HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameUnderMapCursor")]
+        //public static void GenerateMap_getBiomeNameUnderMapCursor_Patch(ref string __result)
+        //{
+        //    try
+        //    {
+        //        __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result.StrToI2Str());
+        //    }
+        //    catch (Exception e) { Debug.LogException(e); }
+        //}
+
+        //[HarmonyPostfix, HarmonyPatch(typeof(GenerateMap), "getBiomeNameById")]
+        //public static void GenerateMap_getBiomeNameById_Patch(ref string __result, int id)
+        //{
+        //    try
+        //    {
+        //        GenerateMap.biomNames biomNames = (GenerateMap.biomNames)id;
+        //        __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, biomNames.ToString());
+        //    }
+        //    catch (Exception e) { Debug.LogException(e); }
+        //}
 
         //ADD
         [HarmonyPostfix, HarmonyPatch(typeof(InventoryItemDescription), "fillItemDescription")]
@@ -492,6 +453,10 @@ namespace DinkumKorean
                         __instance.reachTileText.text = "동물 사료통을 " + item.placeable.sprinklerTile.verticlSize + "타일 밖으로 채웁니다.\n<color=red>동물사료가 필요합니다</color>";
                     }
                 }
+                else
+                {
+                    __instance.reachTiles.SetActive(value: false);
+                }
 
                 if ((bool)item.placeable && (bool)item.placeable.tileObjectBridge)
                 {
@@ -504,18 +469,18 @@ namespace DinkumKorean
             }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(Licence), "getConnectedSkillName")]
-        public static void Licence_getConnectedSkillName_Patch(ref string __result)
-        {
-            try
-            {
-                __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-        }
+        //[HarmonyPostfix, HarmonyPatch(typeof(Licence), "getConnectedSkillName")]
+        //public static void Licence_getConnectedSkillName_Patch(ref string __result)
+        //{
+        //    try
+        //    {
+        //        __result = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __result);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.LogException(e);
+        //    }
+        //}
 
         // ADD
         [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "getDesiredItemNameByNumber")]
@@ -556,47 +521,38 @@ namespace DinkumKorean
             catch (Exception e) { Debug.LogException(e); }
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomBugNoAndLocation")]
-        public static void NPCRequest_setRandomBugNoAndLocation_Patch(NPCRequest __instance)
-        {
-            try
-            {
-                __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
-            }
-            catch (Exception e) { Debug.LogException(e); }
-        }
+        //[HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomBugNoAndLocation")]
+        //public static void NPCRequest_setRandomBugNoAndLocation_Patch(NPCRequest __instance)
+        //{
+        //    try
+        //    {
+        //        __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
+        //    }
+        //    catch (Exception e) { Debug.LogException(e); }
+        //}
 
-        [HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomFishNoAndLocation")]
-        public static void NPCRequest_setRandomFishNoAndLocation_Patch(NPCRequest __instance)
-        {
-            try
-            {
-                __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
-            }
-            catch (Exception e) { Debug.LogException(e); }
-        }
+        //[HarmonyPostfix, HarmonyPatch(typeof(NPCRequest), "setRandomFishNoAndLocation")]
+        //public static void NPCRequest_setRandomFishNoAndLocation_Patch(NPCRequest __instance)
+        //{
+        //    try
+        //    {
+        //        __instance.itemFoundInLocation = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, __instance.itemFoundInLocation);
+        //    }
+        //    catch (Exception e) { Debug.LogException(e); }
+        //}
 
-        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] { typeof(string), typeof(Sprite) })]
-        public static void PickUpNotification_fillButtonPrompt_Patch(PickUpNotification __instance, string buttonPromptText)
+        [HarmonyPostfix, HarmonyPatch(typeof(PostOnBoard), "getContentText")]
+        public static void PostOnBoard_getContentText_Patch(PostOnBoard __instance, ref string __result, int postId)
         {
             try
             {
-                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText);
-                __instance.itemText.text = text;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(PickUpNotification), "fillButtonPrompt", new Type[] { typeof(string), typeof(Input_Rebind.RebindType) })]
-        public static void PickUpNotification_fillButtonPrompt_Patch2(PickUpNotification __instance, string buttonPromptText)
-        {
-            try
-            {
-                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.DynamicTextLocList, buttonPromptText);
-                __instance.itemText.text = text;
+                string textOri = __instance.getPostPostsById().contentText.StrToI2Str();
+                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.PostTextLocList, textOri);
+                __result = KoreanCheck.ReplaceJosa(text.Replace("<boardRewardItem>",
+                    __instance.getPostPostsById().getBoardRewardItem(postId)).Replace("<boardHuntRequestAnimal>",
+                    __instance.getPostPostsById().getBoardHuntRequestAnimal(postId)).Replace("<getAnimalsInPhotoList>",
+                    __instance.getPostPostsById().getRequirementsNeededInPhoto(postId)).Replace("<boardRequestItem>",
+                    __instance.getPostPostsById().getBoardRequestItem(postId)));
             }
             catch (Exception e)
             {
@@ -617,25 +573,6 @@ namespace DinkumKorean
                     __instance.getPostPostsById().getBoardRequestItem(postId)));
             }
             catch (Exception e) { Debug.LogException(e); }
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(PostOnBoard), "getContentText")]
-        public static void PostOnBoard_getContentText_Patch(PostOnBoard __instance, ref string __result, int postId)
-        {
-            try
-            {
-                string textOri = __instance.getPostPostsById().contentText.StrToI2Str();
-                string text = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.PostTextLocList, textOri);
-                __result = KoreanCheck.ReplaceJosa(text.Replace("<boardRewardItem>",
-                    __instance.getPostPostsById().getBoardRewardItem(postId)).Replace("<boardHuntRequestAnimal>",
-                    __instance.getPostPostsById().getBoardHuntRequestAnimal(postId)).Replace("<getAnimalsInPhotoList>",
-                    __instance.getPostPostsById().getRequirementsNeededInPhoto(postId)).Replace("<boardRequestItem>",
-                    __instance.getPostPostsById().getBoardRequestItem(postId)));
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
         }
 
         //ADD
@@ -862,12 +799,24 @@ namespace DinkumKorean
                         __instance.pinMissionText.text = NPCManager.manage.NPCDetails[___pinnedId].NPCName + "의 요청\n<size=11>" + NPCManager.manage.NPCRequests[___pinnedId].getMissionText(___pinnedId);
                     }
                 }
+                
+                if (___pinnedType == QuestTracker.typeOfTask.Quest)
+                {
+                    if (!QuestManager.manage.isQuestCompleted[___pinnedId])
+                    {
+                        string nameOri = QuestManager.manage.allQuests[___pinnedId].QuestName;
+                        string name = TextLocData.GetLoc(DinkumKoreanPlugin.Inst.QuestTextLocList, nameOri);
+                        string pinText = __instance.pinMissionText.text.Replace(QuestManager.manage.allQuests[___pinnedId].QuestName, name);
+                        __instance.pinMissionText.text = pinText;
+                    }
+                }
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
             }
         }
+
         //ADD
         [HarmonyPostfix, HarmonyPatch(typeof(QuestTracker), "displayRequest")]
         public static void QuestTracker_displayRequest_Patch(QuestTracker __instance, int requestNo)
@@ -884,295 +833,305 @@ namespace DinkumKorean
                 Debug.LogException(e);
             }
         }
+
         //ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(Task), MethodType.Constructor, new Type[] { typeof(int), typeof(int) })]
-        public static void Task_Constructor_Patch(Task __instance, int firstDailyTaskNo, int taskIdMax)
+        [HarmonyPostfix, HarmonyPatch(typeof(MailManager), "showLetter")]
+        public static void MailManger_showLetter_Patch(MailManager __instance, int letterId) 
         {
-            try
-            {
-                var tileObjectToInteract = __instance.tileObjectToInteract;
-                var requiredPoints = __instance.requiredPoints;
-                string missionText = "";
-
-                if (firstDailyTaskNo == 0)
-                {
-                    if ((bool)tileObjectToInteract.tileObjectGrowthStages.harvestDrop)
-                    {
-                        missionText = tileObjectToInteract.tileObjectGrowthStages.harvestDrop.getInvItemName() + " " + requiredPoints + "개 수확하기";
-                    }
-                    else
-                    {
-                        missionText = tileObjectToInteract.name + " 수확하기";
-                    }
-                }
-
-                if (firstDailyTaskNo == 1)
-                {
-                    missionText = "곤충 " + requiredPoints + "마리 잡기";
-                }
-
-                if (firstDailyTaskNo == 2)
-                {
-                    missionText = "아이템 " + requiredPoints + "개 제작하기";
-                }
-
-                __instance.missionText = missionText;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-
+            __instance.letterText.text = KoreanCheck.ReplaceJosa(__instance.letterText.text);
         }
-        //ADD
-        [HarmonyPostfix, HarmonyPatch(typeof(Task), "generateTask")]
-        public static void Task_generateTask_Patch(Task __instance)
-        {
-            try
-            {
-                int taskTypeId = __instance.taskTypeId;
-                int requiredPoints = __instance.requiredPoints;
-                var tileObjectToInteract = __instance.tileObjectToInteract;
-                string missionText = "";
-                if (1 == taskTypeId)
-                {
-                    if ((bool)tileObjectToInteract.tileObjectGrowthStages.harvestDrop)
-                    {
-                        missionText = tileObjectToInteract.tileObjectGrowthStages.harvestDrop.getInvItemName() + " " + requiredPoints + "개 수확";
-                    }
-                    else
-                    {
-                        missionText = tileObjectToInteract.name + " 수확";
-                    }
-                }
-                else if (2 == taskTypeId && NPCManager.manage.getNoOfNPCsMovedIn() > 0)
-                {
-                    missionText = "주민 " + requiredPoints + "명과 대화";
-                }
-                else if (37 == taskTypeId)
-                {
-                    missionText = "과일 " + requiredPoints + "개 묻기";
-                }
-                else if (73 == taskTypeId)
-                {
-                    missionText = "조개껍질 " + requiredPoints + "개 수집";
-                }
-                else if (WorldManager.Instance.day != 1 && 34 == taskTypeId)
-                {
-                    if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "조개껍질 " + requiredPoints + "개 팔기";
-                    }
-                }
-                else if (WorldManager.Instance.day != 1 && 87 == taskTypeId)
-                {
-                    if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "과일 " + requiredPoints + "개 팔기";
-                    }
-                }
-                else if (42 == taskTypeId)
-                {
-                    missionText = "누군가를 위해 일하기";
-                }
-                else if (59 == taskTypeId)
-                {
-                    missionText = "야생종자 " + requiredPoints + "개 심기";
-                }
-                else if (60 == taskTypeId && LicenceManager.manage.allLicences[16].hasALevelOneOrHigher())
-                {
-                    missionText = "땅을 " + requiredPoints + "번 파기";
-                }
-                else if (3 == taskTypeId)
-                {
-                    missionText = "곤충 " + requiredPoints + "번 잡기";
-                }
-                else if (WorldManager.Instance.day != 1 && 33 == taskTypeId)
-                {
-                    if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "곤충 " + requiredPoints + "번 팔기";
-                    }
-                }
-                else if (4 == taskTypeId)
-                {
-                    missionText = "아이템 " + requiredPoints + "번 제작";
-                }
-                else if (5 == taskTypeId)
-                {
-                    missionText = "무언가 먹기";
-                }
-                else if (WorldManager.Instance.day != 1 && 8 == taskTypeId && !NPCManager.manage.NPCDetails[1].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                {
-                    missionText = Inventory.Instance.moneyItem.getInvItemName() + " " + requiredPoints + " 얻기";
-                }
-                else if (7 == taskTypeId)
-                {
-                    missionText = Inventory.Instance.moneyItem.getInvItemName() + " " + requiredPoints + " 소비";
-                }
-                else if (6 == taskTypeId)
-                {
-                    missionText = "도보로 " + requiredPoints + "m 이동";
-                }
-                else if (62 == taskTypeId && LicenceManager.manage.allLicences[7].hasALevelOneOrHigher())
-                {
-                    missionText = "탑승물로 " + requiredPoints + "m 이동";
-                }
-                else if (9 == taskTypeId)
-                {
-                    missionText = "고기 " + requiredPoints + "개 요리";
-                }
-                else if (29 == taskTypeId)
-                {
-                    missionText = "과일 " + requiredPoints + "개 요리";
-                }
-                else if (30 == taskTypeId)
-                {
-                    missionText = "조리대에서 뭔가 요리하기";
-                }
-                else if (31 == taskTypeId)
-                {
-                    missionText = "나무씨았 " + requiredPoints + "개 심기";
-                }
-                else if (10 == taskTypeId && LicenceManager.manage.allLicences[11].hasALevelOneOrHigher())
-                {
-                    missionText = "작물종자 " + requiredPoints + "개 심기";
-                }
-                else if (11 == taskTypeId && LicenceManager.manage.allLicences[11].hasALevelOneOrHigher() && !WeatherManager.Instance.rainMgr.IsActive)
-                {
-                    missionText = "작물에 " + requiredPoints + "번 물주기";
-                }
-                else if (12 == taskTypeId && LicenceManager.manage.allLicences[1].hasALevelOneOrHigher())
-                {
-                    missionText = "암석을 " + requiredPoints + "번 부수기";
-                }
-                else if (13 == taskTypeId && LicenceManager.manage.allLicences[1].hasALevelOneOrHigher())
-                {
-                    missionText = "광석을 " + requiredPoints + "번 부수기";
-                }
-                else if (14 == taskTypeId && LicenceManager.manage.allLicences[1].hasALevelOneOrHigher())
-                {
-                    missionText = "광물을 주괴로 녹이기";
-                }
-                else if (15 == taskTypeId && NPCManager.manage.npcStatus[1].checkIfHasMovedIn() && LicenceManager.manage.allLicences[1].hasALevelOneOrHigher())
-                {
-                    missionText = "암석을 " + requiredPoints + "번 갈기";
-                }
-                else if (16 == taskTypeId && LicenceManager.manage.allLicences[2].hasALevelOneOrHigher())
-                {
-                    missionText = "나무 " + requiredPoints + "그루 자르기";
-                }
-                else if (17 == taskTypeId && LicenceManager.manage.allLicences[2].hasALevelOneOrHigher())
-                {
-                    missionText = "그루터기 " + requiredPoints + "개 정리";
-                }
-                else if (18 == taskTypeId && LicenceManager.manage.allLicences[2].hasALevelOneOrHigher())
-                {
-                    missionText = "판자로 " + requiredPoints + "번 제재";
-                }
-                else if (19 == taskTypeId && LicenceManager.manage.allLicences[3].hasALevelOneOrHigher())
-                {
-                    missionText = "물고기 " + requiredPoints + "번 잡기";
-                }
-                else if (WorldManager.Instance.day != 1 && 32 == taskTypeId && LicenceManager.manage.allLicences[3].hasALevelOneOrHigher())
-                {
-                    if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "물고기 " + requiredPoints + "번 팔기";
-                    }
-                }
-                else if (20 == taskTypeId && LicenceManager.manage.allLicences[2].hasALevelOneOrHigher())
-                {
-                    missionText = "풀 " + requiredPoints + "번 정리";
-                }
-                else if (39 == taskTypeId && FarmAnimalManager.manage.isThereAtleastOneActiveAgent())
-                {
-                    missionText = "동물 쓰다듬기";
-                }
-                else if (28 == taskTypeId && (bool)TownManager.manage.allShopFloors[6])
-                {
-                    if (!NPCManager.manage.NPCDetails[4].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "새로운 옷 구입";
-                    }
-                }
-                else if (23 == taskTypeId && (bool)TownManager.manage.allShopFloors[10])
-                {
-                    if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "새로운 가구 구입";
-                    }
-                }
-                else if (24 == taskTypeId && (bool)TownManager.manage.allShopFloors[10])
-                {
-                    if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "새로운 벽지 구입";
-                    }
-                }
-                else if (25 == taskTypeId && (bool)TownManager.manage.allShopFloors[10])
-                {
-                    if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "새로운 바닥재 구입";
-                    }
-                }
-                else if (WorldManager.Instance.getNoOfCompletedCrops() >= 4 && 27 == taskTypeId && LicenceManager.manage.allLicences[11].hasALevelOneOrHigher())
-                {
-                    missionText = "작물 " + requiredPoints + "번 수확";
-                }
-                else if (WorldManager.Instance.day != 1 && WorldManager.Instance.getNoOfCompletedCrops() >= 4 && 35 == taskTypeId && LicenceManager.manage.allLicences[11].hasALevelOneOrHigher())
-                {
-                    missionText = "작물 " + requiredPoints + "번 팔기";
-                }
-                else if (76 == taskTypeId && LicenceManager.manage.allLicences[11].getCurrentLevel() >= 2)
-                {
-                    missionText = "무언가를 퇴비로 만들기";
-                }
-                else if (61 == taskTypeId)
-                {
-                    missionText = "새로운 도구 제작";
-                }
-                else if (26 == taskTypeId && (bool)TownManager.manage.allShopFloors[11])
-                {
-                    if (!NPCManager.manage.NPCDetails[0].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                    {
-                        missionText = "종자 " + requiredPoints + "개 구입";
-                    }
-                }
-                else if (22 == taskTypeId && LicenceManager.manage.allLicences[15].hasALevelOneOrHigher())
-                {
-                    missionText = "동물 포획 및 운반";
-                }
-                else if (21 == taskTypeId && LicenceManager.manage.allLicences[4].hasALevelOneOrHigher())
-                {
-                    missionText = "동물 " + requiredPoints + "번 사냥";
-                }
-                else if (51 == taskTypeId && !NPCManager.manage.NPCDetails[1].mySchedual.dayOff[WorldManager.Instance.day - 1])
-                {
-                    missionText = "새로운 도구 구입";
-                }
-                else if (Inventory.Instance.checkIfToolNearlyBroken() && 52 == taskTypeId)
-                {
-                    missionText = "도구 부수기";
-                }
-                else if (36 == taskTypeId && LicenceManager.manage.allLicences[6].hasALevelOneOrHigher())
-                {
-                    missionText = "묻힌 보물찾기";
-                }
-                else
-                {
-                    missionText = "임무 세트 없음";
-                }
 
-                if (!string.IsNullOrEmpty(missionText))
-                    __instance.missionText = missionText;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-        }
+
+        ////ADD
+        //[HarmonyPostfix, HarmonyPatch(typeof(Task), MethodType.Constructor, new Type[] { typeof(int), typeof(int) })]
+        //public static void Task_Constructor_Patch(Task __instance, int firstDailyTaskNo, int taskIdMax)
+        //{
+        //    try
+        //    {
+        //        var tileObjectToInteract = __instance.tileObjectToInteract;
+        //        var requiredPoints = __instance.requiredPoints;
+        //        string missionText = "";
+
+        //        if (firstDailyTaskNo == 0)
+        //        {
+        //            if ((bool)tileObjectToInteract.tileObjectGrowthStages.harvestDrop)
+        //            {
+        //                missionText = tileObjectToInteract.tileObjectGrowthStages.harvestDrop.getInvItemName() + " " + requiredPoints + "개 수확하기";
+        //            }
+        //            else
+        //            {
+        //                missionText = tileObjectToInteract.name + " 수확하기";
+        //            }
+        //        }
+
+        //        if (firstDailyTaskNo == 1)
+        //        {
+        //            missionText = "곤충 " + requiredPoints + "마리 잡기";
+        //        }
+
+        //        if (firstDailyTaskNo == 2)
+        //        {
+        //            missionText = "아이템 " + requiredPoints + "개 제작하기";
+        //        }
+
+        //        __instance.missionText = missionText;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.LogException(e);
+        //    }
+
+        //}
+
+        ////ADD
+        //[HarmonyPostfix, HarmonyPatch(typeof(Task), "generateTask")]
+        //public static void Task_generateTask_Patch(Task __instance)
+        //{
+        //    try
+        //    {
+        //        int taskTypeId = __instance.taskTypeId;
+        //        int requiredPoints = __instance.requiredPoints;
+        //        var tileObjectToInteract = __instance.tileObjectToInteract;
+        //        string missionText = "";
+        //        if (1 == taskTypeId)
+        //        {
+        //            if ((bool)tileObjectToInteract.tileObjectGrowthStages.harvestDrop)
+        //            {
+        //                missionText = tileObjectToInteract.tileObjectGrowthStages.harvestDrop.getInvItemName() + " " + requiredPoints + "개 수확";
+        //            }
+        //            else
+        //            {
+        //                missionText = tileObjectToInteract.name + " 수확";
+        //            }
+        //        }
+        //        else if (2 == taskTypeId && NPCManager.manage.getNoOfNPCsMovedIn() > 0)
+        //        {
+        //            missionText = "주민 " + requiredPoints + "명과 대화";
+        //        }
+        //        else if (37 == taskTypeId)
+        //        {
+        //            missionText = "과일 " + requiredPoints + "개 묻기";
+        //        }
+        //        else if (73 == taskTypeId)
+        //        {
+        //            missionText = "조개껍질 " + requiredPoints + "개 수집";
+        //        }
+        //        else if (WorldManager.Instance.day != 1 && 34 == taskTypeId)
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "조개껍질 " + requiredPoints + "개 팔기";
+        //            }
+        //        }
+        //        else if (WorldManager.Instance.day != 1 && 87 == taskTypeId)
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "과일 " + requiredPoints + "개 팔기";
+        //            }
+        //        }
+        //        else if (42 == taskTypeId)
+        //        {
+        //            missionText = "누군가를 위해 일하기";
+        //        }
+        //        else if (59 == taskTypeId)
+        //        {
+        //            missionText = "야생종자 " + requiredPoints + "개 심기";
+        //        }
+        //        else if (60 == taskTypeId && LicenceManager.manage.allLicences[16].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "땅을 " + requiredPoints + "번 파기";
+        //        }
+        //        else if (3 == taskTypeId)
+        //        {
+        //            missionText = "곤충 " + requiredPoints + "번 잡기";
+        //        }
+        //        else if (WorldManager.Instance.day != 1 && 33 == taskTypeId)
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "곤충 " + requiredPoints + "번 팔기";
+        //            }
+        //        }
+        //        else if (4 == taskTypeId)
+        //        {
+        //            missionText = "아이템 " + requiredPoints + "번 제작";
+        //        }
+        //        else if (5 == taskTypeId)
+        //        {
+        //            missionText = "무언가 먹기";
+        //        }
+        //        else if (WorldManager.Instance.day != 1 && 8 == taskTypeId && !NPCManager.manage.NPCDetails[1].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //        {
+        //            missionText = Inventory.Instance.moneyItem.getInvItemName() + " " + requiredPoints + " 얻기";
+        //        }
+        //        else if (7 == taskTypeId)
+        //        {
+        //            missionText = Inventory.Instance.moneyItem.getInvItemName() + " " + requiredPoints + " 소비";
+        //        }
+        //        else if (6 == taskTypeId)
+        //        {
+        //            missionText = "도보로 " + requiredPoints + "m 이동";
+        //        }
+        //        else if (62 == taskTypeId && LicenceManager.manage.allLicences[7].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "탑승물로 " + requiredPoints + "m 이동";
+        //        }
+        //        else if (9 == taskTypeId)
+        //        {
+        //            missionText = "고기 " + requiredPoints + "개 요리";
+        //        }
+        //        else if (29 == taskTypeId)
+        //        {
+        //            missionText = "과일 " + requiredPoints + "개 요리";
+        //        }
+        //        else if (30 == taskTypeId)
+        //        {
+        //            missionText = "조리대에서 뭔가 요리하기";
+        //        }
+        //        else if (31 == taskTypeId)
+        //        {
+        //            missionText = "나무씨았 " + requiredPoints + "개 심기";
+        //        }
+        //        else if (10 == taskTypeId && LicenceManager.manage.allLicences[11].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "작물종자 " + requiredPoints + "개 심기";
+        //        }
+        //        else if (11 == taskTypeId && LicenceManager.manage.allLicences[11].hasALevelOneOrHigher() && !WeatherManager.Instance.rainMgr.IsActive)
+        //        {
+        //            missionText = "작물에 " + requiredPoints + "번 물주기";
+        //        }
+        //        else if (12 == taskTypeId && LicenceManager.manage.allLicences[1].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "암석을 " + requiredPoints + "번 부수기";
+        //        }
+        //        else if (13 == taskTypeId && LicenceManager.manage.allLicences[1].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "광석을 " + requiredPoints + "번 부수기";
+        //        }
+        //        else if (14 == taskTypeId && LicenceManager.manage.allLicences[1].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "광물을 주괴로 녹이기";
+        //        }
+        //        else if (15 == taskTypeId && NPCManager.manage.npcStatus[1].checkIfHasMovedIn() && LicenceManager.manage.allLicences[1].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "암석을 " + requiredPoints + "번 갈기";
+        //        }
+        //        else if (16 == taskTypeId && LicenceManager.manage.allLicences[2].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "나무 " + requiredPoints + "그루 자르기";
+        //        }
+        //        else if (17 == taskTypeId && LicenceManager.manage.allLicences[2].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "그루터기 " + requiredPoints + "개 정리";
+        //        }
+        //        else if (18 == taskTypeId && LicenceManager.manage.allLicences[2].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "판자로 " + requiredPoints + "번 제재";
+        //        }
+        //        else if (19 == taskTypeId && LicenceManager.manage.allLicences[3].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "물고기 " + requiredPoints + "번 잡기";
+        //        }
+        //        else if (WorldManager.Instance.day != 1 && 32 == taskTypeId && LicenceManager.manage.allLicences[3].hasALevelOneOrHigher())
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "물고기 " + requiredPoints + "번 팔기";
+        //            }
+        //        }
+        //        else if (20 == taskTypeId && LicenceManager.manage.allLicences[2].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "풀 " + requiredPoints + "번 정리";
+        //        }
+        //        else if (39 == taskTypeId && FarmAnimalManager.manage.isThereAtleastOneActiveAgent())
+        //        {
+        //            missionText = "동물 쓰다듬기";
+        //        }
+        //        else if (28 == taskTypeId && (bool)TownManager.manage.allShopFloors[6])
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[4].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "새로운 옷 구입";
+        //            }
+        //        }
+        //        else if (23 == taskTypeId && (bool)TownManager.manage.allShopFloors[10])
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "새로운 가구 구입";
+        //            }
+        //        }
+        //        else if (24 == taskTypeId && (bool)TownManager.manage.allShopFloors[10])
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "새로운 벽지 구입";
+        //            }
+        //        }
+        //        else if (25 == taskTypeId && (bool)TownManager.manage.allShopFloors[10])
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[3].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "새로운 바닥재 구입";
+        //            }
+        //        }
+        //        else if (WorldManager.Instance.getNoOfCompletedCrops() >= 4 && 27 == taskTypeId && LicenceManager.manage.allLicences[11].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "작물 " + requiredPoints + "번 수확";
+        //        }
+        //        else if (WorldManager.Instance.day != 1 && WorldManager.Instance.getNoOfCompletedCrops() >= 4 && 35 == taskTypeId && LicenceManager.manage.allLicences[11].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "작물 " + requiredPoints + "번 팔기";
+        //        }
+        //        else if (76 == taskTypeId && LicenceManager.manage.allLicences[11].getCurrentLevel() >= 2)
+        //        {
+        //            missionText = "무언가를 퇴비로 만들기";
+        //        }
+        //        else if (61 == taskTypeId)
+        //        {
+        //            missionText = "새로운 도구 제작";
+        //        }
+        //        else if (26 == taskTypeId && (bool)TownManager.manage.allShopFloors[11])
+        //        {
+        //            if (!NPCManager.manage.NPCDetails[0].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //            {
+        //                missionText = "종자 " + requiredPoints + "개 구입";
+        //            }
+        //        }
+        //        else if (22 == taskTypeId && LicenceManager.manage.allLicences[15].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "동물 포획 및 운반";
+        //        }
+        //        else if (21 == taskTypeId && LicenceManager.manage.allLicences[4].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "동물 " + requiredPoints + "번 사냥";
+        //        }
+        //        else if (51 == taskTypeId && !NPCManager.manage.NPCDetails[1].mySchedual.dayOff[WorldManager.Instance.day - 1])
+        //        {
+        //            missionText = "새로운 도구 구입";
+        //        }
+        //        else if (Inventory.Instance.checkIfToolNearlyBroken() && 52 == taskTypeId)
+        //        {
+        //            missionText = "도구 부수기";
+        //        }
+        //        else if (36 == taskTypeId && LicenceManager.manage.allLicences[6].hasALevelOneOrHigher())
+        //        {
+        //            missionText = "묻힌 보물찾기";
+        //        }
+        //        else
+        //        {
+        //            missionText = "임무 세트 없음";
+        //        }
+
+        //        if (!string.IsNullOrEmpty(missionText))
+        //            __instance.missionText = missionText;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.LogException(e);
+        //    }
+        //}
 
         #endregion Postfix
     }

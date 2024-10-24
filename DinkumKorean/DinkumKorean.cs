@@ -20,8 +20,40 @@ namespace DinkumKorean
     {
         public const string GUID = "Kheeman.Dinkum.DinkumKorean";
         public const string PluginName = "DinkumKorean";
-        public const string Version = "1.0.5";
+        public const string Version = "1.0.6";
         public static DinkumKoreanPlugin Inst;
+
+        public static Queue<TextMeshProUGUI> waitShowTMPs = new Queue<TextMeshProUGUI>();
+
+        public ConfigEntry<bool> DevMode;
+        public ConfigEntry<bool> DontLoadLocOnDevMode;
+        public ConfigEntry<bool> LogNoTranslation;
+
+        public UIWindow DebugWindow;
+        public UIWindow ErrorWindow;
+
+        public string ErrorStr;
+        public bool IsPluginLoaded;
+
+        public List<TextLocData> DynamicTextLocList = new List<TextLocData>();
+        public List<TextLocData> HoverTextLocList = new List<TextLocData>();
+        public List<TextLocData> MailTextLocList = new List<TextLocData>();
+        public List<TextLocData> NPCNameTextLocList = new List<TextLocData>();
+        public List<TextLocData> PostTextLocList = new List<TextLocData>();
+        public List<TextLocData> QuestTextLocList = new List<TextLocData>();
+        public List<TextLocData> TipsTextLocList = new List<TextLocData>();
+        public List<TextLocData> TopNotificationLocList = new List<TextLocData>();
+
+        //public List<TextLocData> AnimalsTextLocList = new List<TextLocData>();
+
+        private static IJson _json;
+        private static bool pause;
+
+        private Vector2 cv;
+        private bool isChatHide;
+        private int lastChatCount;
+        private float showChatCD;
+        private float tipsCD = 20;
 
         public static IJson Json
         {
@@ -35,8 +67,6 @@ namespace DinkumKorean
             }
         }
 
-        private static IJson _json;
-
         public static bool Pause
         {
             get
@@ -46,61 +76,6 @@ namespace DinkumKorean
             set
             {
                 pause = value;
-            }
-        }
-
-        private static bool pause;
-
-        public ConfigEntry<bool> DevMode;
-        public ConfigEntry<bool> DontLoadLocOnDevMode;
-        public ConfigEntry<bool> LogNoTranslation;
-
-        public List<TextLocData> DynamicTextLocList = new List<TextLocData>();
-        public List<TextLocData> PostTextLocList = new List<TextLocData>();
-        public List<TextLocData> QuestTextLocList = new List<TextLocData>();
-        public List<TextLocData> TipsTextLocList = new List<TextLocData>();
-        public List<TextLocData> MailTextLocList = new List<TextLocData>();
-        public List<TextLocData> AnimalsTextLocList = new List<TextLocData>();
-
-        public List<TextLocData> HoverTextLocList = new List<TextLocData>();
-        public List<TextLocData> NPCNameTextLocList = new List<TextLocData>();
-
-        public UIWindow DebugWindow;
-        public UIWindow ErrorWindow;
-        public string ErrorStr;
-        public bool IsPluginLoaded;
-
-        /// <summary>
-        /// 게임 시작 시 한 번만 처리하면 됩니다.
-        /// </summary>
-        public void OnGameStartOnceFix()
-        {
-            ReplaceNPCNames();
-            ReplaceHoverTexts();
-        }
-
-        /// <summary>
-        /// NPC 이름 바꾸기
-        /// </summary>
-        public void ReplaceNPCNames()
-        {
-            List<NPCDetails> coms = new List<NPCDetails>();
-            coms.AddRange(Resources.FindObjectsOfTypeAll<NPCDetails>());
-            foreach (var com in coms)
-            {
-                string cnText = TextLocData.GetLoc(NPCNameTextLocList, com.NPCName);
-                com.NPCName = cnText;
-            }
-        }
-
-        public void ReplaceHoverTexts()
-        {
-            List<HoverToolTipOnButton> coms = new List<HoverToolTipOnButton>();
-            coms.AddRange(Resources.FindObjectsOfTypeAll<HoverToolTipOnButton>());
-            foreach (var com in coms)
-            {
-                string cnText = TextLocData.GetLoc(HoverTextLocList, com.hoveringText);
-                com.hoveringText = cnText;
             }
         }
 
@@ -116,7 +91,8 @@ namespace DinkumKorean
             ErrorWindow.OnWinodwGUI = ErrorWindowFunc;
             try
             {
-                Harmony.CreateAndPatchAll(typeof(DinkumKoreanPlugin));
+                //Harmony.CreateAndPatchAll(typeof(DinkumKoreanPlugin));
+                Harmony.CreateAndPatchAll(typeof(OtherPatch));
                 Harmony.CreateAndPatchAll(typeof(ILPatch));
                 Harmony.CreateAndPatchAll(typeof(StringReturnPatch));
                 Harmony.CreateAndPatchAll(typeof(StartTranslatePatch));
@@ -137,75 +113,72 @@ namespace DinkumKorean
                 return;
             }
             Invoke("LogFlagTrue", 2f);
+            Invoke("OnGameStartOnceFix", 2f);
             DynamicTextLocList = TextLocData.LoadFromTxtFile($"{Paths.PluginPath}/I2LocPatch/DynamicTextLoc.txt");
+            NPCNameTextLocList = TextLocData.LoadFromTxtFile($"{Paths.PluginPath}/I2LocPatch/NPCNamesLoc.csv");
+            HoverTextLocList = TextLocData.LoadFromTxtFile($"{Paths.PluginPath}/I2LocPatch/HoverTextLoc.csv");
             PostTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/PostTextLoc.json");
             QuestTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/QuestTextLoc.json");
             TipsTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/TipsTextLoc.json");
             MailTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/MailTextLoc.json");
-            AnimalsTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/AnimalsTextLoc.json");
+            TopNotificationLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/TopNotification.json");
+            //AnimalsTextLocList = TextLocData.LoadFromJsonFile($"{Paths.PluginPath}/I2LocPatch/AnimalsTextLoc.json");
 
-            NPCNameTextLocList = TextLocData.LoadFromTxtFile($"{Paths.PluginPath}/I2LocPatch/NPCNamesLoc.csv");
-            HoverTextLocList = TextLocData.LoadFromTxtFile($"{Paths.PluginPath}/I2LocPatch/HoverTextLoc.csv");
-        }
-
-        public void LogFlagTrue()
-        {
-            IsPluginLoaded = true;
-        }
-
-        public void ErrorWindowFunc()
-        {
-            GUILayout.Label("새 버전이 있는지 확인하세요");
-            GUILayout.Label(ErrorStr);
-        }
-
-        private void Start()
-        {
             OnGameStartOnceFix();
         }
 
-        private void Update()
+        public static void LogInfo(string log)
         {
-            if (DevMode.Value)
+            Inst.Logger.LogInfo(log);
+        }
+
+        /// <summary>
+        /// 번역의 대괄호가 일치하는지 확인하세요.
+        /// </summary>
+        public void CheckKuoHao()
+        {
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            // 索引和Excel表中的行对应的偏移
+            int hangOffset = 3;
+            int findCount = 0;
+            StringBuilder sb = new StringBuilder();
+            LogInfo($"번역에서 괄호 확인 시작:");
+            Regex reg = new Regex(@"(?is)(?<=\<)[^\>]+(?=\>)");
+            var mResourcesCache = Traverse.Create(ResourceManager.pInstance).Field("mResourcesCache").GetValue<Dictionary<string, UnityEngine.Object>>();
+            LanguageSourceAsset asset = mResourcesCache.Values.First() as LanguageSourceAsset;
+            int len = asset.SourceData.mTerms.Count;
+            for (int i = 0; i < len; i++)
             {
-                // Ctrl + Numpad 4 GUI 전환
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha4))
+                var term = asset.SourceData.mTerms[i];
+                if (string.IsNullOrWhiteSpace(term.Languages[3])) continue;
+                MatchCollection mc1 = reg.Matches(term.Languages[0]);
+                MatchCollection mc2 = reg.Matches(term.Languages[3]);
+                if (mc1.Count != mc2.Count)
                 {
-                    DebugWindow.Show = !DebugWindow.Show;
+                    string log = $"줄번호:{i + hangOffset} Key:{term.Term} 괄호 갯수가 맞지 않습니다. 원본 괄호 {mc1.Count}개 번역 괄호 {mc2.Count}개 원문:{term.Languages[0]} 번역:{term.Languages[3]}";
+                    LogInfo(log);
+                    sb.AppendLine(log);
+                    findCount++;
                 }
-                // Ctrl + Numpad 5 게임을 일시 중지, 게임 속도 1
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha5))
+                else if (mc1.Count > 0)
                 {
-                    Pause = !Pause;
-                    Time.timeScale = Pause ? 0 : 1;
-                }
-                // Ctrl + Numpad 6 게임을 일시 중지, 게임 속도 10.
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha6))
-                {
-                    Pause = !Pause;
-                    Time.timeScale = Pause ? 1 : 10;
-                }
-                // Ctrl + Numpad 7 숨겨진 텍스트를 제외한 장면의 모든 텍스트를 덤프합니다.
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha7))
-                {
-                    DumpText(false);
-                }
-                // Ctrl + Numpad 8 숨겨진 텍스트를 포함하여 장면의 모든 텍스트를 덤프합니다.
-                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha8))
-                {
-                    DumpText(true);
+                    for (int j = 0; j < mc1.Count; j++)
+                    {
+                        if (mc1[j].Value != mc2[j].Value)
+                        {
+                            string log = $"줄번호:{i + hangOffset} Key:{term.Term} 대괄호{j}의 내용이 일치하지 않습니다. 원본:<{mc1[j].Value}> 번역:<{mc2[j].Value}>";
+                            LogInfo(log);
+                            sb.AppendLine(log);
+                            findCount++;
+                        }
+                    }
                 }
             }
-            FixChatFont();
+            sw.Stop();
+            LogInfo($"확인 후，문제있는 항목 {findCount}개 발견됨，{sw.ElapsedMilliseconds}ms 소요됨.");
+            System.IO.File.WriteAllText($"{Paths.GameRootPath}/CheckKuoHao.txt", sb.ToString());
         }
-
-        private void OnGUI()
-        {
-            DebugWindow.OnGUI();
-            ErrorWindow.OnGUI();
-        }
-
-        private Vector2 cv;
 
         public void DebugWindowGUI()
         {
@@ -228,46 +201,37 @@ namespace DinkumKorean
             GUILayout.BeginVertical("Dump", GUI.skin.window);
             if (GUILayout.Button("[Ctrl+Numpad 7] 숨겨진 텍스트를 제외한 장면의 모든 텍스트 덤프"))
             {
-                DumpText(false);
+                DumpTool.DumpText(false);
             }
             if (GUILayout.Button("[Ctrl+Numpad 8] 숨겨진 텍스트를 포함하여 장면의 모든 텍스트 덤프"))
             {
-                DumpText(true);
+                DumpTool.DumpText(true);
             }
-            if (GUILayout.Button("다국어 테이블에 없는 모든 대화 덤프(미완성)"))
+            if (GUILayout.Button("一键导出全部原文(需要未汉化状态)"))
             {
-                DumpAllConversation();
-            }
-            if (GUILayout.Button("dump post(미완성)"))
-            {
-                DumpAllPost();
-            }
-            if (GUILayout.Button("dump quest(미완성)"))
-            {
-                DumpAllQuest();
-            }
-            if (GUILayout.Button("dump mail(미완성)"))
-            {
-                DumpAllMail();
-            }
-            if (GUILayout.Button("dump tips(미완성)"))
-            {
-                DumpAllTips();
-            }
-            if (GUILayout.Button("dump animals(미완성)"))
-            {
-                DumpAnimals();
-            }
-            if (GUILayout.Button("번역된 키가 없는 아이템 덤프(미완성)"))
-            {
-                DumpAllUnTermItem();
+                List<string> ignoreTermList = new List<string>();
+                var list1 = DumpTool.DumpAllConversationObject();
+                var list2 = DumpTool.DumpAllItem();
+                ignoreTermList.AddRange(list1);
+                ignoreTermList.AddRange(list2);
+                I2LocPatchPlugin.Instance.DumpAllLocRes(ignoreTermList);
+                DumpTool.DumpAllPost();
+                DumpTool.DumpAllQuest();
+                DumpTool.DumpAllMail();
+                DumpTool.DumpAllTips();
+                DumpTool.DumpAnimals();
+                DumpTool.DumpNPCNames();
+                DumpTool.DumpHoverText();
+                DumpTool.DumpInventoryLootTableTimeWeatherMaster_locationName();
             }
             GUILayout.EndVertical();
         }
 
-        private int lastChatCount;
-        private bool isChatHide;
-        private float showChatCD;
+        public void ErrorWindowFunc()
+        {
+            GUILayout.Label("새 버전이 있는지 확인하세요");
+            GUILayout.Label(ErrorStr);
+        }
 
         public void FixChatFont()
         {
@@ -295,11 +259,91 @@ namespace DinkumKorean
             }
         }
 
-        public static void LogInfo(string log)
+        public void LogFlagTrue()
         {
-            Inst.Logger.LogInfo(log);
+            IsPluginLoaded = true;
         }
 
+        /// <summary>
+        /// 게임 시작 시 한 번만 처리하면 됩니다.
+        /// </summary>
+        public void OnGameStartOnceFix()
+        {
+            //ReplaceNPCNames();
+            ReplaceHoverTexts();
+        }
+        /// <summary>
+        /// NPC 이름 바꾸기
+        /// </summary>
+        public void ReplaceNPCNames()
+        {
+            List<NPCDetails> coms = new List<NPCDetails>();
+            coms.AddRange(Resources.FindObjectsOfTypeAll<NPCDetails>());
+            foreach (var com in coms)
+            {
+                string cnText = TextLocData.GetLoc(NPCNameTextLocList, com.NPCName);
+                com.NPCName = cnText;
+            }
+        }
+        public void ReplaceHoverTexts()
+        {
+            List<HoverToolTipOnButton> coms = new List<HoverToolTipOnButton>();
+            coms.AddRange(Resources.FindObjectsOfTypeAll<HoverToolTipOnButton>());
+            foreach (var com in coms)
+            {
+                string cnText = TextLocData.GetLoc(HoverTextLocList, com.hoveringText);
+                string cnDesc = TextLocData.GetLoc(HoverTextLocList, com.hoveringDesc);
+                com.hoveringText = cnText;
+                com.hoveringDesc = cnDesc;
+            }
+        }
+
+        private void OnGUI()
+        {
+            DebugWindow.OnGUI();
+            ErrorWindow.OnGUI();
+            if (tipsCD > 0)
+            {
+                //GUILayout.Label($"\n[{(int)tipsCD}s]温馨提示：汉化mod是开源免费的，不需要花钱买，Dinkum汉化交流QQ频道-> 4X游戏频道 频道号:7opslk1lrt");
+            }
+        }
+
+        private void Update()
+        {
+            if (DevMode.Value)
+            {
+                // Ctrl + Numpad 4 GUI 전환
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha4))
+                {
+                    DebugWindow.Show = !DebugWindow.Show;
+                }
+                // Ctrl + Numpad 5 게임을 일시 중지, 게임 속도 1
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha5))
+                {
+                    Pause = !Pause;
+                    Time.timeScale = Pause ? 0 : 1;
+                }
+                // Ctrl + Numpad 6 게임을 일시 중지, 게임 속도 10.
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha6))
+                {
+                    Pause = !Pause;
+                    Time.timeScale = Pause ? 1 : 10;
+                }
+                // Ctrl + Numpad 7 숨겨진 텍스트를 제외한 장면의 모든 텍스트를 덤프합니다.
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha7))
+                {
+                    DumpTool.DumpText(false);
+                }
+                // Ctrl + Numpad 8 숨겨진 텍스트를 포함하여 장면의 모든 텍스트를 덤프합니다.
+                if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Alpha8))
+                {
+                    DumpTool.DumpText(true);
+                }
+            }
+            FixChatFont();
+        }
+
+        /*  OtherPatch.cs 이동
         [HarmonyPostfix, HarmonyPatch(typeof(OptionsMenu), "Start")]
         public static void OptionsMenuStartPatch()
         {
@@ -406,59 +450,10 @@ namespace DinkumKorean
                 }
             }
         }
-
-        public static Queue<TextMeshProUGUI> waitShowTMPs = new Queue<TextMeshProUGUI>();
-
-        /// <summary>
-        /// 检查翻译中的括号是否匹配
-        /// </summary>
-        public void CheckKuoHao()
-        {
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-            // 索引和Excel表中的行对应的偏移
-            int hangOffset = 3;
-            int findCount = 0;
-            StringBuilder sb = new StringBuilder();
-            LogInfo($"번역에서 괄호 확인 시작:");
-            Regex reg = new Regex(@"(?is)(?<=\<)[^\>]+(?=\>)");
-            var mResourcesCache = Traverse.Create(ResourceManager.pInstance).Field("mResourcesCache").GetValue<Dictionary<string, UnityEngine.Object>>();
-            LanguageSourceAsset asset = mResourcesCache.Values.First() as LanguageSourceAsset;
-            int len = asset.SourceData.mTerms.Count;
-            for (int i = 0; i < len; i++)
-            {
-                var term = asset.SourceData.mTerms[i];
-                if (string.IsNullOrWhiteSpace(term.Languages[3])) continue;
-                MatchCollection mc1 = reg.Matches(term.Languages[0]);
-                MatchCollection mc2 = reg.Matches(term.Languages[3]);
-                if (mc1.Count != mc2.Count)
-                {
-                    string log = $"줄번호:{i + hangOffset} Key:{term.Term} 괄호 갯수가 맞지 않습니다. 원본 괄호 {mc1.Count}개 번역 괄호 {mc2.Count}개 원문:{term.Languages[0]} 번역:{term.Languages[3]}";
-                    LogInfo(log);
-                    sb.AppendLine(log);
-                    findCount++;
-                }
-                else if (mc1.Count > 0)
-                {
-                    for (int j = 0; j < mc1.Count; j++)
-                    {
-                        if (mc1[j].Value != mc2[j].Value)
-                        {
-                            string log = $"줄번호:{i + hangOffset} Key:{term.Term} 대괄호{j}의 내용이 일치하지 않습니다. 원본:<{mc1[j].Value}> 번역:<{mc2[j].Value}>";
-                            LogInfo(log);
-                            sb.AppendLine(log);
-                            findCount++;
-                        }
-                    }
-                }
-            }
-            sw.Stop();
-            LogInfo($"확인 후，문제있는 항목 {findCount}개 발견됨，{sw.ElapsedMilliseconds}ms 소요됨.");
-            System.IO.File.WriteAllText($"{Paths.GameRootPath}/CheckKuoHao.txt", sb.ToString());
-        }
+        */
 
         /// <summary>
-        /// 获取路径
+        /// 경로 가져오기
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
@@ -483,263 +478,5 @@ namespace DinkumKorean
             }
             return sb.ToString();
         }
-               
-
-        #region Dump
-
-        /// <summary>
-        /// Dump当前的文本
-        /// </summary>
-        /// <param name="includeInactive"></param>
-        public void DumpText(bool includeInactive)
-        {
-            StringBuilder sb = new StringBuilder();
-            var tmps = GameObject.FindObjectsOfType<TextMeshProUGUI>(includeInactive);
-            foreach (var tmp in tmps)
-            {
-                var i2 = tmp.GetComponent<Localize>();
-                if (i2 != null) continue;
-                sb.AppendLine("===========");
-                sb.AppendLine($"path:{GetPath(tmp.transform)}");
-                sb.AppendLine($"text:{tmp.text.StrToI2Str()}");
-            }
-            File.WriteAllText($"{Paths.GameRootPath}/I2/TextDump.txt", sb.ToString());
-            LogInfo($"Dump완료,{Paths.GameRootPath}/I2/TextDump.txt");
-        }
-
-        public void DumpAllConversation()
-        {
-            List<Conversation> conversations = new List<Conversation>();
-            // 直接从资源搜索单独的Conversation
-            conversations.AddRange(Resources.FindObjectsOfTypeAll<Conversation>());
-
-            //StringBuilder sb = new StringBuilder();
-            //sb.AppendLine($"Key\tEnglish");
-            List<string> terms = new List<string>();
-            I2File i2File = new I2File();
-            i2File.Name = "NoTermConversation";
-            i2File.Languages = new List<string>() { "English" };
-
-            foreach (var c in conversations)
-            {
-                // Intro
-                for (int i = 0; i < c.startLineAlt.sequence.Length; i++)
-                {
-                    string key = c.getIntroName(i);
-                    if (!LocalizationManager.Sources[0].ContainsTerm(key))
-                    {
-                        if (!string.IsNullOrWhiteSpace(c.startLineAlt.sequence[i]))
-                        {
-                            string term = $"{key}_{c.startLineAlt.sequence[i].GetHashCode()}";
-                            string line = $"{term}\t{c.startLineAlt.sequence[i].StrToI2Str()}";
-                            if (terms.Contains(term))
-                            {
-                                string log = $"중복 대사 무시. {line}";
-                                Logger.LogError(log);
-                            }
-                            else
-                            {
-                                terms.Add(term);
-                                TermLine termLine = new TermLine();
-                                termLine.Name = term;
-                                termLine.Texts = new string[] { c.startLineAlt.sequence[i] };
-                                i2File.Lines.Add(termLine);
-                                //sb.AppendLine(line);
-                                LogInfo(line);
-                            }
-                        }
-                    }
-                }
-                // Option
-                for (int j = 0; j < c.optionNames.Length; j++)
-                {
-                    if (!c.optionNames[j].Contains("<"))
-                    {
-                        string key = c.getOptionName(j);
-                        if (!LocalizationManager.Sources[0].ContainsTerm(key))
-                        {
-                            if (!string.IsNullOrWhiteSpace(c.optionNames[j]))
-                            {
-                                string term = $"{key}_{c.optionNames[j].GetHashCode()}";
-                                string line = $"{term}\t{c.optionNames[j].StrToI2Str()}";
-                                if (terms.Contains(term))
-                                {
-                                    string log = $"중복 대사 무시. {line}";
-                                    Logger.LogError(log);
-                                }
-                                else
-                                {
-                                    terms.Add(term);
-                                    //sb.AppendLine(line);
-                                    TermLine termLine = new TermLine();
-                                    termLine.Name = term;
-                                    termLine.Texts = new string[] { c.optionNames[j] };
-                                    i2File.Lines.Add(termLine);
-                                    LogInfo(line);
-                                }
-                            }
-                        }
-                    }
-                }
-                // Respone
-                for (int k = 0; k < c.responesAlt.Length; k++)
-                {
-                    for (int l = 0; l < c.responesAlt[k].sequence.Length; l++)
-                    {
-                        string key = c.getResponseName(k, l);
-                        if (!LocalizationManager.Sources[0].ContainsTerm(key))
-                        {
-                            if (!string.IsNullOrWhiteSpace(c.responesAlt[k].sequence[l]))
-                            {
-                                string term = $"{key}_{c.responesAlt[k].sequence[l].GetHashCode()}";
-                                string line = $"{term}\t{c.responesAlt[k].sequence[l].StrToI2Str()}";
-                                if (terms.Contains(term))
-                                {
-                                    string log = $"중복 대사 무시. {line}";
-                                    Logger.LogError(log);
-                                }
-                                else
-                                {
-                                    terms.Add(term);
-                                    //sb.AppendLine(line);
-                                    TermLine termLine = new TermLine();
-                                    termLine.Name = term;
-                                    termLine.Texts = new string[] { c.responesAlt[k].sequence[l] };
-                                    i2File.Lines.Add(termLine);
-                                    LogInfo(line);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            i2File.WriteCSVTable($"{Paths.GameRootPath}/I2/{i2File.Name}.csv");
-            LogInfo($"Dump {i2File.Name} 완료");
-        }
-
-        public void DumpAllPost()
-        {
-            List<BullitenBoardPost> list = new List<BullitenBoardPost>();
-            list.Add(BulletinBoard.board.announcementPosts[0]);
-            list.Add(BulletinBoard.board.huntingTemplate);
-            list.Add(BulletinBoard.board.captureTemplate);
-            list.Add(BulletinBoard.board.tradeTemplate);
-            list.Add(BulletinBoard.board.photoTemplate);
-            list.Add(BulletinBoard.board.cookingTemplate);
-            list.Add(BulletinBoard.board.smeltingTemplate);
-            list.Add(BulletinBoard.board.compostTemplate);
-            list.Add(BulletinBoard.board.sateliteTemplate);
-            list.Add(BulletinBoard.board.craftingTemplate);
-            list.Add(BulletinBoard.board.shippingRequestTemplate);
-            List<TextLocData> list2 = new List<TextLocData>();
-            foreach (var p in list)
-            {
-                list2.Add(new TextLocData(p.title, ""));
-                list2.Add(new TextLocData(p.contentText, ""));
-            }
-            var json = Json.ToJson(list2, true);
-            File.WriteAllText($"{Paths.GameRootPath}/I2/PostTextLoc.json", json);
-            Debug.Log(json);
-        }
-
-        public void DumpAllQuest()
-        {
-            var mgr = QuestManager.manage;
-            List<TextLocData> list = new List<TextLocData>();
-            foreach (var q in mgr.allQuests)
-            {
-                list.Add(new TextLocData(q.QuestName, ""));
-                list.Add(new TextLocData(q.QuestDescription, ""));
-            }
-            var json = Json.ToJson(list, true);
-            File.WriteAllText($"{Paths.GameRootPath}/I2/QuestTextLoc.json", json);
-            Debug.Log(json);
-        }
-
-        public void DumpAllMail()
-        {
-            var mgr = MailManager.manage;
-            List<TextLocData> list = new List<TextLocData>();
-            list.Add(new TextLocData(mgr.animalResearchLetter.letterText, ""));
-            list.Add(new TextLocData(mgr.returnTrapLetter.letterText, ""));
-            list.Add(new TextLocData(mgr.devLetter.letterText, ""));
-            list.Add(new TextLocData(mgr.catalogueItemLetter.letterText, ""));
-            list.Add(new TextLocData(mgr.craftmanDayOff.letterText, ""));
-            foreach (var m in mgr.randomLetters) list.Add(new TextLocData(m.letterText, ""));
-            foreach (var m in mgr.thankYouLetters) list.Add(new TextLocData(m.letterText, ""));
-            foreach (var m in mgr.didNotFitInInvLetter) list.Add(new TextLocData(m.letterText, ""));
-            foreach (var m in mgr.fishingTips) list.Add(new TextLocData(m.letterText, ""));
-            foreach (var m in mgr.bugTips) list.Add(new TextLocData(m.letterText, ""));
-            foreach (var m in mgr.licenceLevelUp) list.Add(new TextLocData(m.letterText, ""));
-            var json = Json.ToJson(list, true);
-            File.WriteAllText($"{Paths.GameRootPath}/I2/MailTextLoc.json", json);
-            Debug.Log(json);
-        }
-
-        public void DumpAllTips()
-        {
-            var mgr = GameObject.FindObjectOfType<LoadingScreenImageAndTips>(true);
-            List<TextLocData> list = new List<TextLocData>();
-            foreach (var tip in mgr.tips) list.Add(new TextLocData(tip, ""));
-            var json = Json.ToJson(list, true);
-            File.WriteAllText($"{Paths.GameRootPath}/I2/TipsTextLoc.json", json);
-            Debug.Log(json);
-        }
-
-        public void DumpAnimals()
-        {
-            var mgr = AnimalManager.manage;
-            List<TextLocData> list = new List<TextLocData>();
-            foreach (var a in mgr.allAnimals) list.Add(new TextLocData(a.animalName, ""));
-            var json = Json.ToJson(list, true);
-            File.WriteAllText($"{Paths.GameRootPath}/I2/AnimalsTextLoc.json", json);
-            Debug.Log(json);
-        }
-
-        public void DumpAllUnTermItem()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Key\tEnglish");
-            List<string> keys = new List<string>();
-            foreach (var item in Inventory.Instance.allItems)
-            {
-                int id = Inventory.Instance.getInvItemId(item);
-                string nameKey = "InventoryItemNames/InvItem_" + id.ToString();
-                string descKey = "InventoryItemDescriptions/InvDesc_" + id.ToString();
-                if (!LocalizationManager.Sources[0].ContainsTerm(nameKey))
-                {
-                    string line = nameKey + "\t" + item.itemName;
-                    LogInfo(line);
-                    if (keys.Contains(nameKey))
-                    {
-                        string log = $"중복 키가 나옴 {nameKey} 추가 안함";
-                        Logger.LogError(log);
-                    }
-                    else
-                    {
-                        keys.Add(nameKey);
-                        sb.AppendLine(line);
-                    }
-                }
-                if (!LocalizationManager.Sources[0].ContainsTerm(descKey))
-                {
-                    string line = descKey + "\t" + item.itemDescription;
-                    LogInfo(line);
-                    if (keys.Contains(descKey))
-                    {
-                        string log = $"중복 키가 나옴 {descKey} 추가 안함";
-                        Logger.LogError(log);
-                    }
-                    else
-                    {
-                        keys.Add(descKey);
-                        sb.AppendLine(line);
-                    }
-                }
-            }
-            File.WriteAllText($"{Paths.GameRootPath}/I2/UnTermItem.csv", sb.ToString());
-        }
-
-        #endregion Dump
     }
 }
